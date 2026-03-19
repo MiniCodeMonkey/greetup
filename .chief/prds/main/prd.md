@@ -21,6 +21,60 @@ The application spec lives at `greetup-spec.md` in the project root and is the a
 
 ## User Stories
 
+### Phase 0: Development Environment Setup
+
+#### US-116: Laravel Sail & Docker Configuration
+**Priority:** 0.1
+**Description:** As a developer, I need a working Laravel Sail / Docker environment so that all services (MySQL, Redis, Meilisearch, Mailpit, Reverb) are available for local development.
+
+**Acceptance Criteria:**
+- [ ] `docker-compose.yml` configured with all required services per spec section 2.4: MySQL 8.0, Redis, Meilisearch, Mailpit, Laravel Reverb, and a queue worker
+- [ ] Laravel Sail installed and configured as a dev dependency (`laravel/sail`)
+- [ ] `.env` file configured with correct service connection details: `DB_CONNECTION=mysql`, `DB_HOST=mysql`, `DB_PORT=3306`, `DB_DATABASE=greetup`, `DB_USERNAME=sail`, `DB_PASSWORD=password`, `REDIS_HOST=redis`, `SCOUT_DRIVER=meilisearch`, `MEILISEARCH_HOST=http://meilisearch:7700`, `MAIL_MAILER=smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`, `BROADCAST_CONNECTION=reverb`, `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis`, `SESSION_DRIVER=redis`
+- [ ] `./vendor/bin/sail up -d` starts all containers without errors
+- [ ] `./vendor/bin/sail artisan migrate` runs successfully against the MySQL container
+- [ ] `./vendor/bin/sail artisan db:show` confirms connection to the MySQL database
+- [ ] Reverb configuration in `.env`: `REVERB_APP_ID`, `REVERB_APP_KEY`, `REVERB_APP_SECRET`, `REVERB_HOST=localhost`, `REVERB_PORT=8080`
+- [ ] A `sail` shell alias is documented (e.g., `alias sail='./vendor/bin/sail'`) for convenience
+
+#### US-117: Install & Configure Required PHP Packages
+**Priority:** 0.2
+**Description:** As a developer, I need all required Composer packages installed so that the application has its full dependency tree ready before feature work begins.
+
+**Acceptance Criteria:**
+- [ ] All required packages installed via Composer: `spatie/laravel-permission`, `spatie/laravel-sluggable`, `spatie/laravel-medialibrary`, `spatie/laravel-tags`, `league/commonmark`, `geocodio/geocodio-library-php`, `intervention/image`, `laravel/reverb`, `laravel/scout`, `laravel/dusk` (dev), `pestphp/pest` (dev), `larastan/larastan` (dev)
+- [ ] Each package's service provider is registered (or auto-discovered) and any required config files are published (e.g., `php artisan vendor:publish` for medialibrary, permission, tags, scout, reverb)
+- [ ] `composer install` completes without errors
+- [ ] `php artisan` runs without errors after package installation
+
+#### US-118: Install & Configure Frontend Dependencies
+**Priority:** 0.3
+**Description:** As a developer, I need the frontend toolchain (Node.js, Tailwind CSS 4, Vite) working so that CSS and JS assets can be compiled.
+
+**Acceptance Criteria:**
+- [ ] `package.json` includes Tailwind CSS v4, Vite, and any required Vite plugins
+- [ ] `npm install` completes without errors
+- [ ] `npm run build` compiles assets without errors
+- [ ] `npm run dev` starts the Vite dev server and hot-reloads on file changes
+- [ ] Tailwind CSS is processing `resources/css/app.css` (verified by adding a utility class and confirming it appears in compiled output)
+
+#### US-119: Verify Full Development Environment
+**Priority:** 0.4
+**Description:** As a developer, I need to verify that the entire local dev environment works end-to-end so that subsequent feature work has a stable foundation.
+
+**Acceptance Criteria:**
+- [ ] `./vendor/bin/sail up -d` starts all services and they reach a healthy state
+- [ ] `./vendor/bin/sail artisan migrate` runs all existing migrations without errors
+- [ ] `./vendor/bin/sail artisan test` runs the default Pest test suite (at minimum the example test passes)
+- [ ] MySQL is accessible from the app container (`sail artisan tinker --execute "DB::connection()->getPdo()"` returns without error)
+- [ ] Redis is accessible (`sail artisan tinker --execute "Illuminate\Support\Facades\Redis::ping()"` returns PONG)
+- [ ] Meilisearch is accessible (`sail artisan tinker --execute "Http::get('http://meilisearch:7700/health')->json()"` returns status available)
+- [ ] Mailpit web UI is accessible at `http://localhost:8025`
+- [ ] `npm run build` produces compiled assets and a page loads without Vite manifest errors
+- [ ] `sail artisan reverb:start` starts the WebSocket server without errors
+- [ ] `sail artisan queue:work --once` processes a queued job without errors (dispatch a test job to verify)
+- [ ] `composer run dev` (or equivalent) starts the full dev stack (app server + Vite + queue worker + Reverb) if configured
+
 ### Phase 1: Design System & Blade Components
 
 #### US-001: Tailwind 4 Theme Configuration
@@ -1391,6 +1445,7 @@ The application spec lives at `greetup-spec.md` in the project root and is the a
 
 ## Functional Requirements
 
+- FR-0: Development environment fully operational via Laravel Sail / Docker with MySQL 8.0, Redis, Meilisearch, Mailpit, Reverb, and queue worker before any feature work begins. All required Composer packages and frontend dependencies installed and verified
 - FR-1: Registration requires name, email (unique), password (min 8), and email verification before group/RSVP access
 - FR-2: Groups support public/private visibility and optional approval-required joining with membership questions
 - FR-3: Group roles (member, event_organizer, assistant_organizer, co_organizer, organizer) are stored on the pivot table with hierarchy values (0-4) and enforce the permission matrix from spec section 3.4; higher roles inherit all lower role permissions
@@ -1446,7 +1501,7 @@ The application spec lives at `greetup-spec.md` in the project root and is the a
 
 ## Success Metrics
 
-- All 115 user stories implemented with acceptance criteria verified
+- All 119 user stories implemented with acceptance criteria verified
 - >= 90% overall test line coverage; >= 95% on models, services, policies; 100% route, authorization, and validation coverage
 - `php artisan migrate:fresh --seed` produces a fully functional demo instance without any API keys
 - All Blade components render correctly at desktop (>=1024px), tablet (768-1023px), and mobile (<768px) breakpoints
