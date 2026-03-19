@@ -193,6 +193,16 @@
             </div>
         </nav>
 
+        @auth
+            @unless (auth()->user()->hasVerifiedEmail())
+                <div class="bg-gold-50 px-4 py-3 text-center text-sm text-gold-900" data-testid="verification-banner">
+                    Your email is not verified.
+                    <a href="{{ route('verification.notice') }}" class="font-medium underline hover:text-gold-700">Verify your email</a>
+                    to join groups and RSVP to events.
+                </div>
+            @endunless
+        @endauth
+
         <main>
             {{ $slot }}
         </main>
