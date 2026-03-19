@@ -2,29 +2,24 @@
 
 namespace App\Models;
 
-use Database\Factories\FeedbackFactory;
+use Database\Factories\EventCommentLikeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Feedback extends Model
+class EventCommentLike extends Model
 {
-    /** @use HasFactory<FeedbackFactory> */
+    /** @use HasFactory<EventCommentLikeFactory> */
     use HasFactory;
 
-    /**
-     * @var string
-     */
-    protected $table = 'event_feedback';
+    public const UPDATED_AT = null;
 
     /**
      * @var list<string>
      */
     protected $fillable = [
-        'event_id',
+        'comment_id',
         'user_id',
-        'rating',
-        'body',
     ];
 
     /**
@@ -33,16 +28,16 @@ class Feedback extends Model
     protected function casts(): array
     {
         return [
-            'rating' => 'integer',
+            'created_at' => 'datetime',
         ];
     }
 
     /**
-     * @return BelongsTo<Event, $this>
+     * @return BelongsTo<Comment, $this>
      */
-    public function event(): BelongsTo
+    public function comment(): BelongsTo
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Comment::class);
     }
 
     /**
