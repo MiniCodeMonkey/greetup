@@ -127,11 +127,11 @@ class Event extends Model implements HasMedia
     }
 
     /**
-     * @return HasMany<ChatMessage, $this>
+     * @return HasMany<EventChatMessage, $this>
      */
     public function chatMessages(): HasMany
     {
-        return $this->hasMany(ChatMessage::class);
+        return $this->hasMany(EventChatMessage::class);
     }
 
     /**
