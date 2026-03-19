@@ -42,4 +42,16 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user account is suspended.
+     */
+    public function suspended(string $reason = 'Violation of community guidelines'): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_suspended' => true,
+            'suspended_at' => now(),
+            'suspended_reason' => $reason,
+        ]);
+    }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -12,9 +13,18 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisterController::class, 'create'])->name('register');
     Route::post('register', [RegisterController::class, 'store'])->middleware('throttle:registration');
+
+    Route::get('login', [LoginController::class, 'create'])->name('login');
+    Route::post('login', [LoginController::class, 'store']);
 });
 
 Route::middleware('auth')->group(function () {
+    Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
+
+    Route::get('suspended', function () {
+        return view('auth.suspended');
+    })->name('suspended');
+
     Route::get('email/verify', function () {
         return view('auth.verify-email');
     })->name('verification.notice');
@@ -30,4 +40,10 @@ Route::middleware('auth')->group(function () {
 
         return back()->with('status', 'verification-link-sent');
     })->middleware('throttle:6,1')->name('verification.send');
+
+    Route::middleware('notSuspended')->group(function () {
+        Route::get('dashboard', function () {
+            return view('welcome');
+        })->name('dashboard');
+    });
 });
