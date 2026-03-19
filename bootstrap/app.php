@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\EnsureAccountNotSuspended;
+use App\Http\Middleware\EnsureGroupMember;
+use App\Http\Middleware\EnsureGroupRole;
 use App\Http\Middleware\TrackLastActivity;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use Illuminate\Foundation\Application;
@@ -23,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'verified' => EnsureEmailIsVerified::class,
             'notSuspended' => EnsureAccountNotSuspended::class,
+            'groupMember' => EnsureGroupMember::class,
+            'groupRole' => EnsureGroupRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
