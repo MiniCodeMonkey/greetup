@@ -43,11 +43,98 @@
                         <a href="/groups" class="text-sm font-medium text-neutral-700 hover:text-green-500">Groups</a>
                     </div>
 
-                    {{-- Desktop auth buttons --}}
-                    <div class="hidden items-center gap-3 md:flex">
-                        <a href="/login" class="rounded-md px-4 py-2 text-sm font-medium text-neutral-700 hover:text-green-500">Log in</a>
-                        <a href="/register" class="rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">Sign up</a>
-                    </div>
+                    @guest
+                        {{-- Desktop auth buttons (guest) --}}
+                        <div class="hidden items-center gap-3 md:flex">
+                            <a href="/login" class="rounded-md px-4 py-2 text-sm font-medium text-neutral-700 hover:text-green-500">Log in</a>
+                            <a href="/register" class="rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">Sign up</a>
+                        </div>
+                    @endguest
+
+                    @auth
+                        @php
+                            $user = auth()->user();
+                            $unreadCount = $user->unreadNotifications()->count();
+                            $recentNotifications = $user->notifications()->take(10)->get();
+                        @endphp
+
+                        {{-- Desktop authenticated controls --}}
+                        <div class="hidden items-center gap-4 md:flex">
+                            {{-- Notification bell --}}
+                            <div class="relative" id="notification-wrapper">
+                                <button
+                                    type="button"
+                                    class="relative rounded-full p-2 text-neutral-500 hover:text-neutral-700"
+                                    aria-label="Notifications"
+                                    onclick="
+                                        const dropdown = document.getElementById('notification-dropdown');
+                                        dropdown.classList.toggle('hidden');
+                                        document.getElementById('account-dropdown').classList.add('hidden');
+                                    "
+                                >
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                                    </svg>
+                                    @if ($unreadCount > 0)
+                                        <span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-coral-500 px-1 text-[10px] font-medium text-white" data-testid="unread-count">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                                    @endif
+                                </button>
+
+                                {{-- Notification dropdown --}}
+                                <div id="notification-dropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-80 rounded-lg bg-white shadow-lg" style="border: 0.5px solid var(--color-neutral-200)">
+                                    <div class="px-4 py-3" style="border-bottom: 0.5px solid var(--color-neutral-200)">
+                                        <h3 class="text-sm font-medium text-neutral-900">Notifications</h3>
+                                    </div>
+                                    <div class="max-h-80 overflow-y-auto" data-testid="notification-list">
+                                        @forelse ($recentNotifications as $notification)
+                                            <div class="px-4 py-3 {{ $notification->read_at ? '' : 'bg-green-50' }}" style="border-bottom: 0.5px solid var(--color-neutral-200)">
+                                                <p class="text-sm text-neutral-700">{{ $notification->data['message'] ?? 'New notification' }}</p>
+                                                <p class="mt-1 text-xs text-neutral-400">{{ $notification->created_at->diffForHumans() }}</p>
+                                            </div>
+                                        @empty
+                                            <div class="px-4 py-6 text-center">
+                                                <p class="text-sm text-neutral-500">No notifications yet</p>
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                    @if ($recentNotifications->count() >= 10)
+                                        <div class="px-4 py-3 text-center" style="border-top: 0.5px solid var(--color-neutral-200)">
+                                            <a href="/notifications" class="text-sm font-medium text-green-500 hover:text-green-700" data-testid="load-more">Load more</a>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- User avatar dropdown --}}
+                            <div class="relative" id="account-wrapper">
+                                <button
+                                    type="button"
+                                    class="flex items-center"
+                                    aria-label="Account menu"
+                                    onclick="
+                                        const dropdown = document.getElementById('account-dropdown');
+                                        dropdown.classList.toggle('hidden');
+                                        document.getElementById('notification-dropdown').classList.add('hidden');
+                                    "
+                                >
+                                    <x-avatar :user="$user" size="sm" />
+                                </button>
+
+                                {{-- Account dropdown --}}
+                                <div id="account-dropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-48 rounded-lg bg-white py-1 shadow-lg" style="border: 0.5px solid var(--color-neutral-200)">
+                                    <a href="/dashboard" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">Dashboard</a>
+                                    <a href="/groups/my" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">My Groups</a>
+                                    <a href="/messages" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">Messages</a>
+                                    <a href="/settings" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">Settings</a>
+                                    <div style="border-top: 0.5px solid var(--color-neutral-200)"></div>
+                                    <form method="POST" action="/logout">
+                                        @csrf
+                                        <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">Logout</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endauth
 
                     {{-- Mobile hamburger button --}}
                     <button
@@ -74,10 +161,34 @@
                 <div class="space-y-1 px-4 pb-4 pt-2">
                     <a href="/explore" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Explore</a>
                     <a href="/groups" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Groups</a>
-                    <div class="mt-3 flex flex-col gap-2 pt-3" style="border-top: 0.5px solid var(--color-neutral-200)">
-                        <a href="/login" class="rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Log in</a>
-                        <a href="/register" class="rounded-md bg-green-500 px-3 py-2 text-center text-sm font-medium text-white hover:bg-green-700">Sign up</a>
-                    </div>
+
+                    @guest
+                        <div class="mt-3 flex flex-col gap-2 pt-3" style="border-top: 0.5px solid var(--color-neutral-200)">
+                            <a href="/login" class="rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Log in</a>
+                            <a href="/register" class="rounded-md bg-green-500 px-3 py-2 text-center text-sm font-medium text-white hover:bg-green-700">Sign up</a>
+                        </div>
+                    @endguest
+
+                    @auth
+                        <div class="mt-3 flex flex-col gap-1 pt-3" style="border-top: 0.5px solid var(--color-neutral-200)">
+                            <a href="/dashboard" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Dashboard</a>
+                            <a href="/groups/my" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">My Groups</a>
+                            <a href="/messages" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Messages</a>
+                            <a href="/notifications" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
+                                Notifications
+                                @if ($unreadCount > 0)
+                                    <span class="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-coral-500 px-1 text-[10px] font-medium text-white">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                                @endif
+                            </a>
+                            <a href="/settings" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Settings</a>
+                        </div>
+                        <div class="mt-2 pt-2" style="border-top: 0.5px solid var(--color-neutral-200)">
+                            <form method="POST" action="/logout">
+                                @csrf
+                                <button type="submit" class="block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-100">Logout</button>
+                            </form>
+                        </div>
+                    @endauth
                 </div>
             </div>
         </nav>
