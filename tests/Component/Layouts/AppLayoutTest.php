@@ -159,7 +159,7 @@ it('renders account dropdown with Dashboard, My Groups, Messages, Settings, Logo
     $view->assertSee('href="/messages"', false);
     $view->assertSee('href="/settings"', false);
     $view->assertSee('Logout');
-    $view->assertSee('action="/logout"', false);
+    $view->assertSee('action="' . route('logout') . '"', false);
 });
 
 it('renders notification dropdown with recent notifications', function () {

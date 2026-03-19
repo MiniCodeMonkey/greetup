@@ -127,7 +127,7 @@
                                     <a href="/messages" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">Messages</a>
                                     <a href="/settings" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">Settings</a>
                                     <div style="border-top: 0.5px solid var(--color-neutral-200)"></div>
-                                    <form method="POST" action="/logout">
+                                    <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">Logout</button>
                                     </form>
@@ -183,7 +183,7 @@
                             <a href="/settings" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Settings</a>
                         </div>
                         <div class="mt-2 pt-2" style="border-top: 0.5px solid var(--color-neutral-200)">
-                            <form method="POST" action="/logout">
+                            <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-100">Logout</button>
                             </form>
