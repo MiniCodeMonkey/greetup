@@ -80,7 +80,8 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'group_members')
-            ->withPivot('role', 'joined_at')
+            ->using(GroupMember::class)
+            ->withPivot('role', 'joined_at', 'is_banned', 'banned_at', 'banned_reason')
             ->withTimestamps();
     }
 

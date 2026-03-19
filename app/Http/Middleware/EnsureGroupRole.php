@@ -32,7 +32,8 @@ class EnsureGroupRole
             abort(403, 'You are not a member of this group.');
         }
 
-        $userRole = GroupRole::from($membership->pivot->role);
+        $pivotRole = $membership->pivot->role;
+        $userRole = $pivotRole instanceof GroupRole ? $pivotRole : GroupRole::from($pivotRole);
         $requiredRole = GroupRole::from($minimumRole);
 
         if (! $userRole->isAtLeast($requiredRole)) {

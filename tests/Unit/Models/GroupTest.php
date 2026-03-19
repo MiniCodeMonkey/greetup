@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\GroupRole;
 use App\Enums\GroupVisibility;
 use App\Models\Group;
 use App\Models\User;
@@ -249,7 +250,7 @@ it('attaches members with pivot data', function (): void {
     ]);
 
     expect($group->members)->toHaveCount(1)
-        ->and($group->members->first()->pivot->role)->toBe('member')
+        ->and($group->members->first()->pivot->role)->toBe(GroupRole::Member)
         ->and($group->members->first()->pivot->joined_at)->not->toBeNull();
 });
 

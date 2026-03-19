@@ -82,8 +82,25 @@ class Group extends Model implements HasMedia
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'group_members')
-            ->withPivot('role', 'joined_at')
+            ->using(GroupMember::class)
+            ->withPivot('role', 'joined_at', 'is_banned', 'banned_at', 'banned_reason')
             ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<GroupMembershipQuestion, $this>
+     */
+    public function membershipQuestions(): HasMany
+    {
+        return $this->hasMany(GroupMembershipQuestion::class);
+    }
+
+    /**
+     * @return HasMany<GroupJoinRequest, $this>
+     */
+    public function joinRequests(): HasMany
+    {
+        return $this->hasMany(GroupJoinRequest::class);
     }
 
     /**

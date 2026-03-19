@@ -11,20 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('group_members', function (Blueprint $table) {
+        Schema::create('group_join_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('group_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('role')->default('member');
-            $table->timestamp('joined_at')->nullable();
-            $table->boolean('is_banned')->default(false);
-            $table->timestamp('banned_at')->nullable();
-            $table->text('banned_reason')->nullable();
+            $table->string('status')->default('pending');
+            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('reviewed_at')->nullable();
+            $table->text('denial_reason')->nullable();
             $table->timestamps();
 
             $table->unique(['group_id', 'user_id']);
-            $table->index(['group_id', 'role']);
-            $table->index('user_id');
+            $table->index(['group_id', 'status']);
         });
     }
 
@@ -33,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('group_members');
+        Schema::dropIfExists('group_join_requests');
     }
 };
