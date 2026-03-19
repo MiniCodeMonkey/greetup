@@ -23,6 +23,9 @@
 10. [Test Plan](#10-test-plan)
 11. [GitHub Actions CI](#11-github-actions-ci)
 12. [README / Self-Hosting Guide](#12-readme--self-hosting-guide)
+13. [CONTRIBUTING.md](#13-contributingmd)
+14. [Error Pages](#14-error-pages)
+15. [SEO & Social Sharing](#15-seo--social-sharing)
 
 ---
 
@@ -3294,6 +3297,250 @@ vendor/bin/pest --parallel  # Run tests
 
 Greetup is open-source software licensed under the [MIT License](LICENSE).
 ```
+
+---
+
+## 13. CONTRIBUTING.md
+
+The following should be the contents of the project's `CONTRIBUTING.md`.
+
+---
+
+### CONTRIBUTING.md Content
+
+```markdown
+# Contributing to Greetup
+
+Thank you for your interest in contributing to Greetup! This guide will help you get set up and ensure your contributions can be merged smoothly.
+
+## Getting Started
+
+1. Fork the repository and clone your fork.
+2. Set up your local environment using the [Quick Start guide](README.md#quick-start-with-docker).
+3. Create a new branch from `main` for your work.
+
+## Branch Naming
+
+Use descriptive branch names with a prefix:
+
+- `feature/` — new functionality (e.g., `feature/event-recurring-series`)
+- `fix/` — bug fixes (e.g., `fix/waitlist-promotion-race-condition`)
+- `refactor/` — code improvements without behavior changes
+- `docs/` — documentation changes
+- `test/` — adding or improving tests
+
+## Making Changes
+
+1. **Search before building.** Check existing issues and PRs to avoid duplicating work.
+2. **Keep PRs focused.** One feature or fix per pull request. Small PRs are reviewed faster.
+3. **Write tests.** All new features need feature tests. Bug fixes should include a test that reproduces the bug.
+4. **Follow existing patterns.** Check sibling files for naming conventions, structure, and approach before creating something new.
+
+## Before Submitting a PR
+
+Run the full quality check suite:
+
+```bash
+# Fix code style (required — CI will reject style violations)
+vendor/bin/pint
+
+# Static analysis
+vendor/bin/phpstan analyse
+
+# Run the full test suite
+vendor/bin/pest --parallel
+```
+
+All three must pass. CI runs these automatically on every PR.
+
+## Commit Messages
+
+Write clear, concise commit messages:
+
+- Use the imperative mood ("Add waitlist promotion" not "Added waitlist promotion")
+- First line: short summary (under 72 characters)
+- Optionally: blank line followed by a longer explanation of *why*, not *what*
+
+Good:
+```
+Add automatic waitlist promotion when RSVP is cancelled
+
+When a Going RSVP is cancelled, the next eligible waitlisted member
+is promoted via a queued job. Members with guests are skipped if
+there aren't enough spots for their full party.
+```
+
+## Pull Request Process
+
+1. Fill in the PR template with a summary and test plan.
+2. Ensure CI passes (lint, tests, browser tests).
+3. A maintainer will review your PR. Address feedback and push updates to the same branch.
+4. Once approved, a maintainer will merge via squash-and-merge.
+
+## Reporting Bugs
+
+Open an issue with:
+- Steps to reproduce
+- Expected behavior
+- Actual behavior
+- Environment details (PHP version, database, browser if relevant)
+
+## Code of Conduct
+
+Be respectful and constructive. We're building a community platform — let's model the community we want to see.
+```
+
+---
+
+## 14. Error Pages
+
+Custom error pages should match the Greetup design system and provide a helpful, branded experience rather than showing Laravel defaults.
+
+### 14.1 Error Page Design
+
+All error pages share a common layout:
+- Centered content on a neutral-50 background.
+- Large decorative blob (green-500, opacity 0.06) in the background.
+- Error code displayed large (44px, weight 500, neutral-400).
+- Headline (22px, weight 500, neutral-900) explaining the error.
+- Body text (16px, neutral-500) with a helpful message.
+- Primary CTA button linking back to the homepage or a sensible destination.
+- Navigation bar remains visible so the user can navigate elsewhere.
+
+### 14.2 Error Pages to Create
+
+| File | HTTP Status | Headline | Body | CTA |
+|------|------------|----------|------|-----|
+| `resources/views/errors/403.blade.php` | 403 Forbidden | "You don't have access to this page" | "You might need to join this group or have a different role to view this content." | "Go to Explore" → `/explore` |
+| `resources/views/errors/404.blade.php` | 404 Not Found | "We couldn't find that page" | "The page you're looking for might have been moved, deleted, or never existed." | "Go to Explore" → `/explore` |
+| `resources/views/errors/419.blade.php` | 419 Page Expired | "This page has expired" | "Your session timed out. Please go back and try again." | "Go back" → `javascript:history.back()` |
+| `resources/views/errors/429.blade.php` | 429 Too Many Requests | "Slow down" | "You're making requests too quickly. Please wait a moment and try again." | "Go to Explore" → `/explore` |
+| `resources/views/errors/500.blade.php` | 500 Server Error | "Something went wrong" | "We hit an unexpected error. If this keeps happening, please let the site administrator know." | "Go to homepage" → `/` |
+| `resources/views/errors/503.blade.php` | 503 Service Unavailable | "We'll be right back" | "Greetup is undergoing maintenance. Please check back shortly." | *(no CTA — page auto-refreshes after 60 seconds)* |
+
+### 14.3 Suspended Account Page
+
+Not a standard HTTP error but shown to suspended users via the `EnsureAccountNotSuspended` middleware:
+
+- **File:** `resources/views/auth/suspended.blade.php`
+- **Layout:** Same error page layout but with a red-500 accent instead of green.
+- **Headline:** "Your account has been suspended"
+- **Body:** Shows the suspension reason from `suspended_reason` column.
+- **CTA:** "Contact support" link (configurable via platform settings, or omitted if not set).
+- **Nav:** Minimal — only the Greetup logo and a logout link.
+
+---
+
+## 15. SEO & Social Sharing
+
+### 15.1 Page Titles
+
+Every page should have a descriptive `<title>` tag following this pattern:
+
+| Page | Title Format |
+|------|-------------|
+| Homepage | `Greetup — Find your people` |
+| Explore | `Explore Events — Greetup` |
+| Group page | `{Group Name} — Greetup` |
+| Event page | `{Event Name} · {Group Name} — Greetup` |
+| User profile | `{User Name} — Greetup` |
+| Dashboard | `Dashboard — Greetup` |
+| Search results | `Search: "{query}" — Greetup` |
+| Group search | `Browse Groups — Greetup` |
+| Admin pages | `Admin: {Section} — Greetup` |
+| Error pages | `{Error Code} — Greetup` |
+
+The site name portion ("Greetup") should use the `site_name` platform setting so self-hosted instances can customize it.
+
+### 15.2 Meta Description
+
+Each public page should include a `<meta name="description">` tag:
+
+| Page | Description Source |
+|------|-------------------|
+| Homepage | Platform setting `site_description`, fallback: "A free, open source community events platform." |
+| Group page | First 160 characters of the group's description (plain text, stripped of markdown). |
+| Event page | First 160 characters of the event's description (plain text). |
+| User profile | User's bio (first 160 characters), or "{Name} is a member of Greetup." if no bio. |
+| Explore / Search | Static: "Discover local meetups, events, and community groups near you." |
+
+### 15.3 Open Graph & Twitter Card Tags
+
+All public pages (group, event, profile, explore, homepage) should include Open Graph and Twitter Card meta tags for rich link previews:
+
+```html
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="{page title}">
+<meta property="og:description" content="{meta description}">
+<meta property="og:image" content="{cover photo URL or default OG image}">
+<meta property="og:url" content="{canonical URL}">
+<meta property="og:site_name" content="{site_name setting}">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{page title}">
+<meta name="twitter:description" content="{meta description}">
+<meta name="twitter:image" content="{cover photo URL or default OG image}">
+```
+
+**Image selection:**
+- **Event page:** Event cover photo if set, otherwise the group's cover photo, otherwise the default OG image.
+- **Group page:** Group cover photo if set, otherwise the default OG image.
+- **User profile:** User's avatar if set, otherwise the default OG image.
+- **All other pages:** Default OG image.
+
+**Default OG image:** A branded 1200x630 image stored at `public/images/og-default.png` featuring the Greetup logo on a green-900 background with decorative blobs. This should be created as part of the initial asset setup.
+
+### 15.4 Canonical URLs
+
+Every public page should include a `<link rel="canonical">` tag pointing to its clean URL (without query parameters for pagination, filters, etc.) to prevent duplicate content issues.
+
+### 15.5 Structured Data (JSON-LD)
+
+Event pages should include [Schema.org Event](https://schema.org/Event) structured data for search engine rich results:
+
+```html
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "{event name}",
+    "description": "{event description, plain text, max 300 chars}",
+    "startDate": "{ISO 8601 datetime}",
+    "endDate": "{ISO 8601 datetime, if set}",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "{based on event_type: OfflineEventAttendanceMode / OnlineEventAttendanceMode / MixedEventAttendanceMode}",
+    "location": {
+        "@type": "{Place for in-person, VirtualLocation for online}",
+        "name": "{venue_name or 'Online'}",
+        "address": "{venue_address, if in-person}"
+    },
+    "organizer": {
+        "@type": "Organization",
+        "name": "{group name}",
+        "url": "{group URL}"
+    },
+    "image": "{cover photo URL or default OG image}",
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "{based on RSVP status: InStock / SoldOut / PreOrder}"
+    }
+}
+</script>
+```
+
+For cancelled events, `eventStatus` should be `EventCancelled`.
+
+### 15.6 Blade Implementation
+
+SEO tags should be managed via a reusable Blade component and a `@section`-based approach:
+
+- **`<x-seo>` component:** Accepts `title`, `description`, `image`, `type`, and optional `jsonLd` props. Renders all meta tags in the `<head>`.
+- **Each page view** sets its SEO data via the component in the layout's head section.
+- **`SeoService`** (optional helper): generates meta description from markdown content (strips tags, truncates), resolves the OG image URL (with fallback chain), and builds JSON-LD arrays for events.
 
 ---
 
