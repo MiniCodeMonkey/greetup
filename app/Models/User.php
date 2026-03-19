@@ -117,6 +117,23 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         return $this->hasMany(Block::class);
     }
 
+    /**
+     * @return HasMany<ConversationParticipant, $this>
+     */
+    public function conversationParticipants(): HasMany
+    {
+        return $this->hasMany(ConversationParticipant::class);
+    }
+
+    /**
+     * @return BelongsToMany<Conversation, $this>
+     */
+    public function conversations(): BelongsToMany
+    {
+        return $this->belongsToMany(Conversation::class, 'conversation_participants')
+            ->withPivot('last_read_at', 'is_muted', 'created_at');
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')
