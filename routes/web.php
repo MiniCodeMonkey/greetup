@@ -88,11 +88,11 @@ Route::middleware('auth')->group(function () {
         Route::middleware('groupRole:event_organizer')->group(function () {
             Route::get('groups/{group:slug}/events/create', [EventController::class, 'create'])->name('events.create');
             Route::post('groups/{group:slug}/events', [EventController::class, 'store'])->name('events.store');
-            Route::get('groups/{group:slug}/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
-            Route::put('groups/{group:slug}/events/{event}', [EventController::class, 'update'])->name('events.update');
-            Route::post('groups/{group:slug}/events/{event}/cancel', [EventController::class, 'cancel'])->name('events.cancel');
-
+            Route::post('groups/{group:slug}/events/{event:slug}/cancel', [EventController::class, 'cancel'])->name('events.cancel');
         });
+
+        Route::get('groups/{group:slug}/events/{event:slug}/edit', [EventController::class, 'edit'])->name('events.edit');
+        Route::put('groups/{group:slug}/events/{event:slug}', [EventController::class, 'update'])->name('events.update');
 
         Route::get('groups/{group:slug}/events/{event:slug}/attendees', [AttendeeManagementController::class, 'index'])->name('events.attendees');
         Route::get('groups/{group:slug}/events/{event:slug}/attendees/export', [AttendeeManagementController::class, 'export'])->name('events.attendees.export');

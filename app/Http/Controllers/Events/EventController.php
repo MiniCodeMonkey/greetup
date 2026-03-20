@@ -7,8 +7,10 @@ use App\Enums\EventType;
 use App\Enums\RsvpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\CreateEventRequest;
+use App\Http\Requests\Events\UpdateEventRequest;
 use App\Models\Event;
 use App\Models\Group;
+use App\Notifications\EventUpdated;
 use App\Notifications\NewEvent;
 use App\Services\EventSeriesService;
 use App\Services\MarkdownService;
@@ -209,6 +211,12 @@ class EventController extends Controller
     {
         Gate::authorize('update', $event);
 
+        $cutoff = $event->ends_at
+            ? $event->ends_at->copy()->addHours(24)
+            : $event->starts_at->copy()->addHours(24);
+
+        abort_if(now()->gt($cutoff), 403, 'The editing window for this event has closed.');
+
         return view('events.edit', [
             'group' => $group,
             'event' => $event,
@@ -218,18 +226,22 @@ class EventController extends Controller
     /**
      * Update an event (handles both single and series edits).
      */
-    public function update(Request $request, Group $group, Event $event, MarkdownService $markdownService, EventSeriesService $seriesService): RedirectResponse
+    public function update(UpdateEventRequest $request, Group $group, Event $event, MarkdownService $markdownService, EventSeriesService $seriesService): RedirectResponse
     {
-        Gate::authorize('update', $event);
+        $validated = $request->validated();
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:10000'],
-            'venue_name' => ['nullable', 'string', 'max:255'],
-            'venue_address' => ['nullable', 'string', 'max:500'],
-            'online_link' => ['nullable', 'url', 'max:2000'],
-            'edit_scope' => ['nullable', 'in:single,all_future'],
-        ]);
+        $timezone = $validated['timezone'] ?? $event->timezone ?? $group->timezone ?? config('app.timezone');
+
+        $startsAt = Carbon::parse($validated['starts_at'], $timezone)->utc();
+        $endsAt = isset($validated['ends_at'])
+            ? Carbon::parse($validated['ends_at'], $timezone)->utc()
+            : null;
+        $rsvpOpensAt = isset($validated['rsvp_opens_at'])
+            ? Carbon::parse($validated['rsvp_opens_at'], $timezone)->utc()
+            : null;
+        $rsvpClosesAt = isset($validated['rsvp_closes_at'])
+            ? Carbon::parse($validated['rsvp_closes_at'], $timezone)->utc()
+            : null;
 
         $attributes = [
             'name' => $validated['name'],
@@ -237,9 +249,19 @@ class EventController extends Controller
             'description_html' => isset($validated['description'])
                 ? $markdownService->render($validated['description'])
                 : null,
+            'event_type' => $validated['event_type'],
+            'starts_at' => $startsAt,
+            'ends_at' => $endsAt,
             'venue_name' => $validated['venue_name'] ?? null,
             'venue_address' => $validated['venue_address'] ?? null,
             'online_link' => $validated['online_link'] ?? null,
+            'rsvp_limit' => $validated['rsvp_limit'] ?? null,
+            'guest_limit' => $validated['guest_limit'] ?? 0,
+            'rsvp_opens_at' => $rsvpOpensAt,
+            'rsvp_closes_at' => $rsvpClosesAt,
+            'is_chat_enabled' => $validated['is_chat_enabled'] ?? true,
+            'is_comments_enabled' => $validated['is_comments_enabled'] ?? true,
+            'timezone' => $timezone,
         ];
 
         $editScope = $validated['edit_scope'] ?? 'single';
@@ -250,6 +272,25 @@ class EventController extends Controller
         } else {
             $event->update($attributes);
             $message = 'Event updated successfully.';
+        }
+
+        if ($request->hasFile('cover_photo')) {
+            $event->addMediaFromRequest('cover_photo')
+                ->toMediaCollection('cover_photo');
+        }
+
+        $event->refresh();
+
+        if ($event->status === EventStatus::Published) {
+            $rsvpUsers = $event->rsvps()
+                ->whereIn('status', [RsvpStatus::Going, RsvpStatus::Waitlisted])
+                ->with('user')
+                ->get()
+                ->pluck('user');
+
+            foreach ($rsvpUsers as $rsvpUser) {
+                $rsvpUser->notify(new EventUpdated($event, $group));
+            }
         }
 
         return redirect()->route('groups.show', $group)

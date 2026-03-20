@@ -229,6 +229,10 @@ it('edits a single event in a series', function (): void {
     $this->actingAs($user)
         ->put(route('events.update', [$group, $targetEvent]), [
             'name' => 'Updated Single Event',
+            'starts_at' => $targetEvent->starts_at->format('Y-m-d H:i'),
+            'event_type' => $targetEvent->event_type->value,
+            'venue_name' => $targetEvent->venue_name,
+            'venue_address' => $targetEvent->venue_address,
             'edit_scope' => 'single',
         ])
         ->assertRedirect(route('groups.show', $group))
@@ -265,6 +269,10 @@ it('edits all future events in a series', function (): void {
     $this->actingAs($user)
         ->put(route('events.update', [$group, $targetEvent]), [
             'name' => 'Updated Future Events',
+            'starts_at' => $targetEvent->starts_at->format('Y-m-d H:i'),
+            'event_type' => $targetEvent->event_type->value,
+            'venue_name' => $targetEvent->venue_name,
+            'venue_address' => $targetEvent->venue_address,
             'edit_scope' => 'all_future',
         ])
         ->assertRedirect(route('groups.show', $group))

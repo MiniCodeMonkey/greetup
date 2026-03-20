@@ -9,7 +9,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('events.update', [$group, $event]) }}" class="mt-8 space-y-6">
+        <form method="POST" action="{{ route('events.update', [$group, $event]) }}" enctype="multipart/form-data" class="mt-8 space-y-6">
             @csrf
             @method('PUT')
 
@@ -48,6 +48,7 @@
             {{-- Description --}}
             <div>
                 <label for="description" class="block text-sm font-medium text-neutral-700">Description</label>
+                <p class="mt-0.5 text-xs text-neutral-400">Supports Markdown formatting.</p>
                 <textarea
                     id="description"
                     name="description"
@@ -60,38 +61,116 @@
                 @enderror
             </div>
 
-            {{-- Venue --}}
-            <div class="space-y-4">
+            {{-- Event Type --}}
+            <div>
+                <label class="block text-sm font-medium text-neutral-700">Event Type <span class="text-red-500">*</span></label>
+                <div class="mt-2 space-y-2">
+                    @php $currentType = old('event_type', $event->event_type->value); @endphp
+                    <label class="flex items-center gap-2">
+                        <input type="radio" name="event_type" value="in_person" {{ $currentType === 'in_person' ? 'checked' : '' }} class="text-green-500 focus:ring-green-500" />
+                        <span class="text-sm text-neutral-700">In Person</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="radio" name="event_type" value="online" {{ $currentType === 'online' ? 'checked' : '' }} class="text-green-500 focus:ring-green-500" />
+                        <span class="text-sm text-neutral-700">Online</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="radio" name="event_type" value="hybrid" {{ $currentType === 'hybrid' ? 'checked' : '' }} class="text-green-500 focus:ring-green-500" />
+                        <span class="text-sm text-neutral-700">Hybrid</span>
+                    </label>
+                </div>
+                @error('event_type')
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Start Date/Time --}}
+            @php
+                $tz = $event->timezone ?? $group->timezone ?? config('app.timezone');
+                $startsLocal = $event->starts_at ? $event->starts_at->setTimezone($tz)->format('Y-m-d\TH:i') : '';
+                $endsLocal = $event->ends_at ? $event->ends_at->setTimezone($tz)->format('Y-m-d\TH:i') : '';
+            @endphp
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                    <label for="venue_name" class="block text-sm font-medium text-neutral-700">Venue Name</label>
+                    <label for="starts_at" class="block text-sm font-medium text-neutral-700">Starts At <span class="text-red-500">*</span></label>
                     <input
-                        type="text"
-                        id="venue_name"
-                        name="venue_name"
-                        value="{{ old('venue_name', $event->venue_name) }}"
-                        class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+                        type="datetime-local"
+                        id="starts_at"
+                        name="starts_at"
+                        value="{{ old('starts_at', $startsLocal) }}"
+                        required
+                        class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
                     />
-                    @error('venue_name')
+                    @error('starts_at')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
-                    <label for="venue_address" class="block text-sm font-medium text-neutral-700">Venue Address</label>
+                    <label for="ends_at" class="block text-sm font-medium text-neutral-700">Ends At</label>
                     <input
-                        type="text"
-                        id="venue_address"
-                        name="venue_address"
-                        value="{{ old('venue_address', $event->venue_address) }}"
-                        class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+                        type="datetime-local"
+                        id="ends_at"
+                        name="ends_at"
+                        value="{{ old('ends_at', $endsLocal) }}"
+                        class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
                     />
-                    @error('venue_address')
+                    @error('ends_at')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
 
-            {{-- Online Link --}}
+            {{-- Timezone --}}
             <div>
+                <label for="timezone" class="block text-sm font-medium text-neutral-700">Timezone</label>
+                <input
+                    type="text"
+                    id="timezone"
+                    name="timezone"
+                    value="{{ old('timezone', $tz) }}"
+                    placeholder="e.g. America/New_York"
+                    class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+                />
+                @error('timezone')
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Venue (for in_person/hybrid) --}}
+            <div id="venue_fields">
+                <div class="space-y-4">
+                    <div>
+                        <label for="venue_name" class="block text-sm font-medium text-neutral-700">Venue Name</label>
+                        <input
+                            type="text"
+                            id="venue_name"
+                            name="venue_name"
+                            value="{{ old('venue_name', $event->venue_name) }}"
+                            class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+                        />
+                        @error('venue_name')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="venue_address" class="block text-sm font-medium text-neutral-700">Venue Address</label>
+                        <input
+                            type="text"
+                            id="venue_address"
+                            name="venue_address"
+                            value="{{ old('venue_address', $event->venue_address) }}"
+                            class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+                        />
+                        <p class="mt-1 text-xs text-neutral-400">The address will be geocoded in the background after saving.</p>
+                        @error('venue_address')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            {{-- Online Link (for online/hybrid) --}}
+            <div id="online_link_field">
                 <label for="online_link" class="block text-sm font-medium text-neutral-700">Online Link</label>
                 <input
                     type="url"
@@ -103,6 +182,106 @@
                 @error('online_link')
                     <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                 @enderror
+            </div>
+
+            {{-- Cover Photo --}}
+            <div>
+                <label for="cover_photo" class="block text-sm font-medium text-neutral-700">Cover Photo</label>
+                @if ($event->getFirstMediaUrl('cover_photo'))
+                    <p class="mt-1 text-xs text-neutral-400">A cover photo is already uploaded. Upload a new one to replace it.</p>
+                @endif
+                <input
+                    type="file"
+                    id="cover_photo"
+                    name="cover_photo"
+                    accept="image/jpeg,image/png,image/webp"
+                    class="mt-1 block w-full text-sm text-neutral-500 file:mr-4 file:rounded-md file:border-0 file:bg-green-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-green-700 hover:file:bg-green-100"
+                />
+                <p class="mt-1 text-xs text-neutral-400">JPEG, PNG, or WebP. Max 5MB.</p>
+                @error('cover_photo')
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- RSVP Settings --}}
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <label for="rsvp_limit" class="block text-sm font-medium text-neutral-700">RSVP Limit</label>
+                    <input
+                        type="number"
+                        id="rsvp_limit"
+                        name="rsvp_limit"
+                        value="{{ old('rsvp_limit', $event->rsvp_limit) }}"
+                        min="1"
+                        placeholder="Leave blank for unlimited"
+                        class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+                    />
+                    @error('rsvp_limit')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="guest_limit" class="block text-sm font-medium text-neutral-700">Guest Limit</label>
+                    <input
+                        type="number"
+                        id="guest_limit"
+                        name="guest_limit"
+                        value="{{ old('guest_limit', $event->guest_limit) }}"
+                        min="0"
+                        max="10"
+                        class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+                    />
+                    @error('guest_limit')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            @php
+                $rsvpOpensLocal = $event->rsvp_opens_at ? $event->rsvp_opens_at->setTimezone($tz)->format('Y-m-d\TH:i') : '';
+                $rsvpClosesLocal = $event->rsvp_closes_at ? $event->rsvp_closes_at->setTimezone($tz)->format('Y-m-d\TH:i') : '';
+            @endphp
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <label for="rsvp_opens_at" class="block text-sm font-medium text-neutral-700">RSVP Opens At</label>
+                    <input
+                        type="datetime-local"
+                        id="rsvp_opens_at"
+                        name="rsvp_opens_at"
+                        value="{{ old('rsvp_opens_at', $rsvpOpensLocal) }}"
+                        class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+                    />
+                    @error('rsvp_opens_at')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="rsvp_closes_at" class="block text-sm font-medium text-neutral-700">RSVP Closes At</label>
+                    <input
+                        type="datetime-local"
+                        id="rsvp_closes_at"
+                        name="rsvp_closes_at"
+                        value="{{ old('rsvp_closes_at', $rsvpClosesLocal) }}"
+                        class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
+                    />
+                    @error('rsvp_closes_at')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Chat & Comments --}}
+            <div class="space-y-3">
+                <label class="flex items-center gap-2">
+                    <input type="hidden" name="is_chat_enabled" value="0" />
+                    <input type="checkbox" name="is_chat_enabled" value="1" {{ old('is_chat_enabled', $event->is_chat_enabled) ? 'checked' : '' }} class="rounded border-neutral-200 text-green-500 focus:ring-green-500" />
+                    <span class="text-sm text-neutral-700">Enable event chat</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input type="hidden" name="is_comments_enabled" value="0" />
+                    <input type="checkbox" name="is_comments_enabled" value="1" {{ old('is_comments_enabled', $event->is_comments_enabled) ? 'checked' : '' }} class="rounded border-neutral-200 text-green-500 focus:ring-green-500" />
+                    <span class="text-sm text-neutral-700">Enable comments</span>
+                </label>
             </div>
 
             {{-- Submit --}}
@@ -150,4 +329,29 @@
             </form>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const eventTypeRadios = document.querySelectorAll('input[name="event_type"]');
+            const venueFields = document.getElementById('venue_fields');
+            const onlineLinkField = document.getElementById('online_link_field');
+
+            function toggleConditionalFields() {
+                const selected = document.querySelector('input[name="event_type"]:checked');
+                if (!selected) return;
+
+                const type = selected.value;
+                venueFields.style.display = (type === 'in_person' || type === 'hybrid') ? 'block' : 'none';
+                onlineLinkField.style.display = (type === 'online' || type === 'hybrid') ? 'block' : 'none';
+            }
+
+            eventTypeRadios.forEach(function (radio) {
+                radio.addEventListener('change', toggleConditionalFields);
+            });
+
+            toggleConditionalFields();
+        });
+    </script>
+    @endpush
 </x-layouts.app>
