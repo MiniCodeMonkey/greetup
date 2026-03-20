@@ -123,3 +123,5 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('groups/{group:slug}', [GroupController::class, 'show'])->name('groups.show');
+Route::get('groups/{group:slug}/events/{event:slug}', [EventController::class, 'show'])->name('events.show');
+Route::get('groups/{group:slug}/events/{event:slug}/calendar', [EventController::class, 'calendar'])->name('events.calendar');

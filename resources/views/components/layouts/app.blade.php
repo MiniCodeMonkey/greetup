@@ -27,6 +27,7 @@
         />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @stack('styles')
     </head>
     <body class="bg-neutral-50 font-body text-neutral-900 antialiased">
         <nav class="sticky top-0 z-50 bg-white" style="border-bottom: 0.5px solid var(--color-neutral-200)">
