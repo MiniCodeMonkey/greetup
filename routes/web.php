@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Groups\GroupController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\Settings\SettingsController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -67,5 +68,9 @@ Route::middleware('auth')->group(function () {
         Route::put('settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
         Route::get('settings/data-export', [SettingsController::class, 'exportData'])->name('settings.data-export');
         Route::delete('settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.account.delete');
+
+        Route::get('groups/create', [GroupController::class, 'create'])->name('groups.create');
+        Route::post('groups', [GroupController::class, 'store'])->name('groups.store');
+        Route::get('groups/{group:slug}', [GroupController::class, 'show'])->name('groups.show');
     });
 });

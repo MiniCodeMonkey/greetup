@@ -50,6 +50,14 @@ class GroupPolicy
     }
 
     /**
+     * Any verified user can create a group.
+     */
+    public function create(User $user): bool
+    {
+        return ! $user->is_suspended && $user->hasVerifiedEmail();
+    }
+
+    /**
      * Any user can view a group.
      */
     public function view(User $user, Group $group): bool
