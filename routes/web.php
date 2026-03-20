@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Discussions\DiscussionController;
 use App\Http\Controllers\Events\AttendeeManagementController;
 use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Groups\GroupAnalyticsController;
@@ -79,6 +80,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('groups/create', [GroupController::class, 'create'])->name('groups.create');
         Route::post('groups', [GroupController::class, 'store'])->name('groups.store');
+        Route::get('groups/{group:slug}/discussions/create', [DiscussionController::class, 'create'])->name('discussions.create');
+        Route::post('groups/{group:slug}/discussions', [DiscussionController::class, 'store'])->name('discussions.store');
+
         Route::post('groups/{group:slug}/join', [GroupController::class, 'join'])->name('groups.join');
         Route::post('groups/{group:slug}/leave', [GroupController::class, 'leave'])->name('groups.leave');
         Route::post('groups/{group:slug}/request-join', [GroupController::class, 'requestJoin'])->name('groups.request-join');

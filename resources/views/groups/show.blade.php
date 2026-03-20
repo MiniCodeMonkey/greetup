@@ -232,17 +232,41 @@
                 @endif
 
                 @if ($tab === 'discussions')
+                    @auth
+                        @if ($isMember)
+                            <div class="mb-4">
+                                <a href="{{ route('discussions.create', $group) }}"
+                                   class="inline-flex items-center rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                   data-testid="create-discussion-button"
+                                >
+                                    New Discussion
+                                </a>
+                            </div>
+                        @endif
+                    @endauth
+
                     @if ($discussions->isEmpty())
                         <p class="text-sm text-neutral-500" data-testid="no-discussions">No discussions yet.</p>
                     @else
                         <div class="space-y-4" data-testid="discussions-list">
                             @foreach ($discussions as $discussion)
                                 <div class="rounded-lg px-4 py-3" style="border: 0.5px solid var(--color-neutral-200)">
-                                    <h3 class="text-sm font-medium text-neutral-900">{{ $discussion->title }}</h3>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-sm font-medium text-neutral-900">{{ $discussion->title }}</h3>
+                                        @if ($discussion->is_pinned)
+                                            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700" data-testid="pinned-badge">Pinned</span>
+                                        @endif
+                                    </div>
                                     <p class="mt-1 text-xs text-neutral-500">by {{ $discussion->author->name ?? 'Unknown' }}</p>
                                 </div>
                             @endforeach
                         </div>
+
+                        @if ($discussions->hasPages())
+                            <div class="mt-6">
+                                {{ $discussions->appends(['tab' => 'discussions'])->links() }}
+                            </div>
+                        @endif
                     @endif
                 @endif
 

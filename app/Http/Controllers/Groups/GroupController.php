@@ -256,9 +256,8 @@ class GroupController extends Controller
             if ($tab === 'discussions') {
                 $discussions = $group->discussions()
                     ->with('author')
-                    ->latest()
-                    ->limit(20)
-                    ->get();
+                    ->pinnedFirst()
+                    ->paginate(15);
             }
 
             if ($tab === 'members') {

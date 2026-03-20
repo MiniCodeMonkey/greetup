@@ -70,6 +70,16 @@ class Discussion extends Model
     }
 
     /**
+     * Alias for user() — used in views.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
      * @return HasMany<DiscussionReply, $this>
      */
     public function replies(): HasMany
