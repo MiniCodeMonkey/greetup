@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\GroupRole;
+use App\Models\DirectMessage;
 use App\Models\User;
 use InvalidArgumentException;
 
@@ -58,6 +59,24 @@ class AccountService
                 'status' => $rsvp->status->value,
                 'guest_count' => $rsvp->guest_count,
                 'checked_in' => $rsvp->checked_in,
+            ])->toArray(),
+            'discussions' => $user->discussions()->with('group:id,name')->get()->map(fn ($discussion) => [
+                'group' => $discussion->group?->name,
+                'title' => $discussion->title,
+                'body' => $discussion->body,
+                'created_at' => $discussion->created_at?->toIso8601String(),
+            ])->toArray(),
+            'messages' => DirectMessage::where('user_id', $user->id)
+                ->get()
+                ->map(fn ($message) => [
+                    'conversation_id' => $message->conversation_id,
+                    'body' => $message->body,
+                    'created_at' => $message->created_at?->toIso8601String(),
+                ])->toArray(),
+            'notification_preferences' => $user->notificationPreferences()->get()->map(fn ($pref) => [
+                'type' => $pref->type,
+                'channel' => $pref->channel->value,
+                'enabled' => $pref->enabled,
             ])->toArray(),
         ];
 

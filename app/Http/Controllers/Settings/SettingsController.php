@@ -9,11 +9,13 @@ use App\Http\Requests\Settings\UpdateNotificationPreferencesRequest;
 use App\Http\Requests\Settings\UpdatePrivacyRequest;
 use App\Http\Requests\Settings\UpdateProfileRequest;
 use App\Models\NotificationPreference;
+use App\Services\AccountService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Spatie\Tags\Tag;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SettingsController extends Controller
 {
@@ -199,6 +201,23 @@ class SettingsController extends Controller
 
         return redirect()->route('settings', ['section' => 'privacy'])
             ->with('status', 'Privacy settings updated successfully.');
+    }
+
+    /**
+     * Download all user data as a JSON file.
+     */
+    public function exportData(Request $request, AccountService $accountService): StreamedResponse
+    {
+        $user = $request->user();
+        $json = $accountService->exportData($user);
+
+        $filename = 'greetup-data-export-'.now()->format('Y-m-d').'.json';
+
+        return response()->streamDownload(function () use ($json): void {
+            echo $json;
+        }, $filename, [
+            'Content-Type' => 'application/json',
+        ]);
     }
 
     /**
