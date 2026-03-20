@@ -17,6 +17,7 @@ use App\Http\Controllers\Groups\LeadershipTeamController;
 use App\Http\Controllers\Groups\OwnershipTransferController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\Messages\ConversationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Livewire\DashboardPage;
 use App\Livewire\ExplorePage;
@@ -92,6 +93,8 @@ Route::middleware('auth')->group(function () {
 
         Route::post('members/{user}/block', [BlockController::class, 'store'])->name('members.block');
         Route::delete('members/{user}/block', [BlockController::class, 'destroy'])->name('members.unblock');
+
+        Route::post('reports', [ReportController::class, 'store'])->name('reports.store')->middleware('throttle:report-submission');
 
         Route::get('messages', [ConversationController::class, 'index'])->name('messages.index');
         Route::post('messages', [ConversationController::class, 'store'])->name('messages.store')->middleware('throttle:dm');
