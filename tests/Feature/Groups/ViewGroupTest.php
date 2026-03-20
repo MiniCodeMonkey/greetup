@@ -56,7 +56,7 @@ it('shows correct SEO title and meta description', function (): void {
     $response = $this->get(route('groups.show', $group));
 
     $response->assertStatus(200)
-        ->assertSee('Berlin Tech Meetup — '.config('app.name'), false);
+        ->assertSee('Berlin Tech Meetup — Greetup', false);
 });
 
 it('displays interest pills with cycling colors', function (): void {

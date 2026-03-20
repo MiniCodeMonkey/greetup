@@ -14,7 +14,7 @@ class AdminSettingsController extends Controller
     {
         $settings = Setting::allCached();
 
-        $seoTitle = 'Admin: Settings — '.config('app.name', 'Greetup');
+        $seoTitle = 'Admin: Settings — '.Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.settings', compact('settings', 'seoTitle'));
     }

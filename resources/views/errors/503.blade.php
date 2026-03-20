@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="refresh" content="60">
 
-        <title>503 - Service Unavailable</title>
+        <title>503 — {{ \App\Models\Setting::get('site_name', config('app.name', 'Greetup')) }}</title>
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

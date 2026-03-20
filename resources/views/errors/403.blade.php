@@ -1,4 +1,4 @@
-<x-layouts.app title="403 - Forbidden">
+<x-layouts.app :title="'403 — ' . \App\Models\Setting::get('site_name', config('app.name', 'Greetup'))">
     <div class="relative flex min-h-[calc(100vh-12rem)] items-center justify-center px-4">
         <x-blob class="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" color="var(--color-green-500)" :size="480" :opacity="0.06" />
 

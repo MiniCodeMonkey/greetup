@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Group;
+use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -79,7 +80,7 @@ class GroupSearchPage extends Component
 
         $topics = Tag::getWithType('topic')->pluck('name')->sort()->values();
 
-        $siteName = config('app.name', 'Greetup');
+        $siteName = Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('livewire.group-search-page', [
             'groups' => $groups,

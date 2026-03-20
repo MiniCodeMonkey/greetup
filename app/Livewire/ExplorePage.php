@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Enums\EventType;
 use App\Enums\RsvpStatus;
 use App\Models\Event;
+use App\Models\Setting;
 use App\Services\GeocodingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -109,7 +110,7 @@ class ExplorePage extends Component
 
         $topics = Tag::getWithType('interest')->pluck('name')->sort()->values();
 
-        $siteName = config('app.name', 'Greetup');
+        $siteName = Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('livewire.explore-page', [
             'events' => $events,

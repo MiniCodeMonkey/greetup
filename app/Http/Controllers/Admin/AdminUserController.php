@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SuspendUserRequest;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\AccountSuspended;
 use Illuminate\Http\RedirectResponse;
@@ -29,7 +30,7 @@ class AdminUserController extends Controller
 
         $users = $query->latest()->paginate(25)->withQueryString();
 
-        $seoTitle = 'Admin: Users — '.config('app.name', 'Greetup');
+        $seoTitle = 'Admin: Users — '.Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.users.index', compact('users', 'seoTitle'));
     }
@@ -40,7 +41,7 @@ class AdminUserController extends Controller
         $groups = $user->groups()->latest('group_members.created_at')->get();
         $rsvps = $user->rsvps()->with(['event.group'])->latest()->limit(25)->get();
 
-        $seoTitle = "Admin: {$user->name} — ".config('app.name', 'Greetup');
+        $seoTitle = "Admin: {$user->name} — ".Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.users.show', compact('user', 'groups', 'rsvps', 'seoTitle'));
     }

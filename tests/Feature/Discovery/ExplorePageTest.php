@@ -56,15 +56,16 @@ it('renders the explore page for authenticated users', function (): void {
         ->assertSee('PHP Conference');
 });
 
-it('redirects guests from homepage to explore', function (): void {
+it('renders homepage for guests with correct title', function (): void {
     $this->get('/')
-        ->assertRedirect('/explore');
+        ->assertOk()
+        ->assertSee('Greetup — Find your people', false);
 });
 
 it('has correct SEO meta tags', function (): void {
     $this->get('/explore')
         ->assertOk()
-        ->assertSee('Explore Events — '.config('app.name', 'Greetup'), false)
+        ->assertSee('Explore Events — Greetup', false)
         ->assertSee('Discover local meetups, events, and community groups near you.', false);
 });
 

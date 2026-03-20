@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\ResolveReportRequest;
 use App\Http\Requests\Admin\SuspendUserRequest;
 use App\Models\Group;
 use App\Models\Report;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\AccountSuspended;
 use Illuminate\Http\RedirectResponse;
@@ -39,7 +40,7 @@ class AdminReportController extends Controller
             ->get()
             ->mapWithKeys(fn ($row) => [$row->reportable_type.':'.$row->reportable_id => $row->report_count]);
 
-        $seoTitle = 'Admin: Reports — '.config('app.name', 'Greetup');
+        $seoTitle = 'Admin: Reports — '.Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.reports.index', compact('reports', 'groupedCounts', 'seoTitle'));
     }

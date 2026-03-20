@@ -48,9 +48,10 @@ it('renders the dashboard for authenticated users', function (): void {
         ->assertSee('Dashboard');
 });
 
-it('guests see explore page instead of dashboard', function (): void {
+it('guests see homepage instead of dashboard', function (): void {
     $this->get('/')
-        ->assertRedirect('/explore');
+        ->assertOk()
+        ->assertSee('Find your people', false);
 });
 
 it('authenticated users are redirected from homepage to dashboard', function (): void {
@@ -67,7 +68,7 @@ it('has correct SEO title', function (): void {
     $this->actingAs($user)
         ->get('/dashboard')
         ->assertOk()
-        ->assertSee('Dashboard — '.config('app.name', 'Greetup'), false);
+        ->assertSee('Dashboard — Greetup', false);
 });
 
 it('shows upcoming events the user RSVP\'d Going to, sorted by date', function (): void {

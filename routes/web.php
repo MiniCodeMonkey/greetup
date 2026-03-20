@@ -30,6 +30,7 @@ use App\Livewire\ExplorePage;
 use App\Livewire\GlobalSearch;
 use App\Livewire\GroupSearchPage;
 use App\Models\Conversation;
+use App\Models\Setting;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,8 +40,14 @@ Route::get('/', function () {
         return redirect('/dashboard');
     }
 
-    return redirect('/explore');
-});
+    $siteName = Setting::get('site_name', config('app.name', 'Greetup'));
+    $description = Setting::get('site_description') ?: 'A free, open source community events platform.';
+
+    return view('home', [
+        'title' => "{$siteName} — Find your people",
+        'description' => $description,
+    ]);
+})->name('home');
 
 Route::livewire('/explore', ExplorePage::class)->name('explore');
 Route::livewire('/search', GlobalSearch::class)->name('search');

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Enums\ProfileVisibility;
 use App\Models\Event;
 use App\Models\Group;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -194,7 +195,7 @@ class GlobalSearch extends Component
         $events = $this->searchEvents();
         $users = $this->searchUsers();
 
-        $siteName = config('app.name', 'Greetup');
+        $siteName = Setting::get('site_name', config('app.name', 'Greetup'));
         $title = $this->query !== ''
             ? "Search: \"{$this->query}\" — {$siteName}"
             : "Search — {$siteName}";

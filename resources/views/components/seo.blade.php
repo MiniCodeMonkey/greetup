@@ -9,24 +9,20 @@
 
 @php
     $ogImage = $image ?? asset('images/og-default.png');
-    $siteName = config('app.name');
+    $siteName = \App\Models\Setting::get('site_name', config('app.name', 'Greetup'));
+    $canonical = $canonicalUrl ?? strtok(url()->current(), '?');
 @endphp
 
 <title>{{ $title }}</title>
 <meta name="description" content="{{ $description }}">
-
-@if($canonicalUrl)
-    <link rel="canonical" href="{{ $canonicalUrl }}">
-@endif
+<link rel="canonical" href="{{ $canonical }}">
 
 {{-- Open Graph --}}
 <meta property="og:type" content="{{ $type }}">
 <meta property="og:title" content="{{ $title }}">
 <meta property="og:description" content="{{ $description }}">
 <meta property="og:image" content="{{ $ogImage }}">
-@if($canonicalUrl)
-    <meta property="og:url" content="{{ $canonicalUrl }}">
-@endif
+<meta property="og:url" content="{{ $canonical }}">
 <meta property="og:site_name" content="{{ $siteName }}">
 
 {{-- Twitter Card --}}

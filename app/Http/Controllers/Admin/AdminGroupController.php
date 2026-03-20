@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Group;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,7 +28,7 @@ class AdminGroupController extends Controller
 
         $groups = $query->latest()->paginate(25)->withQueryString();
 
-        $seoTitle = 'Admin: Groups — '.config('app.name', 'Greetup');
+        $seoTitle = 'Admin: Groups — '.Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.groups.index', compact('groups', 'seoTitle'));
     }
@@ -36,7 +37,7 @@ class AdminGroupController extends Controller
     {
         $group->load('organizer')->loadCount(['members', 'events']);
 
-        $seoTitle = "Admin: {$group->name} — ".config('app.name', 'Greetup');
+        $seoTitle = "Admin: {$group->name} — ".Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.groups.show', compact('group', 'seoTitle'));
     }

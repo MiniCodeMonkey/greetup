@@ -1,10 +1,13 @@
 <?php
 
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 beforeEach(function () {
     $this->withoutVite();
+    Cache::put(Setting::CACHE_KEY, Setting::DEFAULTS);
 });
 
 function makeAuthUser(string $name = 'Jane Doe', int $id = 1, int $unreadCount = 0, array $notifications = []): User
@@ -113,8 +116,8 @@ it('renders slot content inside main element', function () {
 it('uses default title and description when not provided', function () {
     $view = $this->blade('<x-layouts.app>Content</x-layouts.app>');
 
-    $view->assertSee(config('app.name'), false);
-    $view->assertSee('Find your people', false);
+    $view->assertSee('Greetup', false);
+    $view->assertSee('A free, open source community events platform.', false);
 });
 
 it('shows notification bell and avatar dropdown for authenticated users', function () {

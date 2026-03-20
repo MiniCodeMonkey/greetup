@@ -10,6 +10,7 @@ use App\Http\Requests\Events\CreateEventRequest;
 use App\Http\Requests\Events\UpdateEventRequest;
 use App\Models\Event;
 use App\Models\Group;
+use App\Models\Setting;
 use App\Notifications\EventCancelled;
 use App\Notifications\EventUpdated;
 use App\Notifications\NewEvent;
@@ -51,7 +52,7 @@ class EventController extends Controller
             $coverPhoto = $group->getFirstMediaUrl('cover_photo', 'header');
         }
 
-        $seoTitle = $event->name.' · '.$group->name.' — '.config('app.name', 'Greetup');
+        $seoTitle = $event->name.' · '.$group->name.' — '.Setting::get('site_name', config('app.name', 'Greetup'));
         $seoDescription = $event->description
             ? Str::limit(strip_tags($event->description), 160)
             : 'Event hosted by '.$group->name;

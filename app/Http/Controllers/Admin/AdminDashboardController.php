@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Group;
 use App\Models\Report;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\View\View;
 
@@ -38,7 +39,7 @@ class AdminDashboardController extends Controller
             ->take(10)
             ->get();
 
-        $seoTitle = 'Admin: Dashboard — '.config('app.name', 'Greetup');
+        $seoTitle = 'Admin: Dashboard — '.Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.dashboard', compact('stats', 'recentReports', 'recentGroups', 'seoTitle'));
     }

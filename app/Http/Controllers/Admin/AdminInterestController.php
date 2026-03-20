@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\MergeInterestRequest;
 use App\Http\Requests\Admin\StoreInterestRequest;
 use App\Http\Requests\Admin\UpdateInterestRequest;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,14 +33,14 @@ class AdminInterestController extends Controller
                 return $tag;
             });
 
-        $seoTitle = 'Admin: Interests — '.config('app.name', 'Greetup');
+        $seoTitle = 'Admin: Interests — '.Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.interests.index', compact('interests', 'seoTitle'));
     }
 
     public function create(): View
     {
-        $seoTitle = 'Admin: Create Interest — '.config('app.name', 'Greetup');
+        $seoTitle = 'Admin: Create Interest — '.Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.interests.create', compact('seoTitle'));
     }
@@ -54,7 +55,7 @@ class AdminInterestController extends Controller
 
     public function edit(Tag $interest): View
     {
-        $seoTitle = "Admin: Edit {$interest->name} — ".config('app.name', 'Greetup');
+        $seoTitle = "Admin: Edit {$interest->name} — ".Setting::get('site_name', config('app.name', 'Greetup'));
 
         return view('admin.interests.edit', compact('interest', 'seoTitle'));
     }

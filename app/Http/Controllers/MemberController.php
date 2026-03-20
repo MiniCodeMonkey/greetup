@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -24,10 +25,11 @@ class MemberController extends Controller
 
         $interests = $user->tagsWithType('interest');
 
-        $seoTitle = $user->name.' — '.config('app.name', 'Greetup');
+        $siteName = Setting::get('site_name', config('app.name', 'Greetup'));
+        $seoTitle = $user->name.' — '.$siteName;
         $seoDescription = $user->bio
             ? str()->limit(strip_tags($user->bio), 160)
-            : $user->name.' is a member of '.config('app.name', 'Greetup').'.';
+            : $user->name.' is a member of '.$siteName.'.';
 
         $seoImage = $user->getFirstMediaUrl('avatar', 'profile-page') ?: null;
 

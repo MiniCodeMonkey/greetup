@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Enums\RsvpStatus;
 use App\Models\Event;
 use App\Models\Group;
+use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -18,7 +19,7 @@ class DashboardPage extends Component
     public function render(): View
     {
         $user = Auth::user();
-        $siteName = config('app.name', 'Greetup');
+        $siteName = Setting::get('site_name', config('app.name', 'Greetup'));
 
         $upcomingEvents = $this->getUpcomingEvents($user);
         $userGroups = $this->getUserGroups($user);

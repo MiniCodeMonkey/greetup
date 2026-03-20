@@ -58,7 +58,7 @@ it('displays correct SEO title and meta description', function (): void {
     $response = $this->get(route('events.show', [$group, $event]));
 
     $response->assertStatus(200)
-        ->assertSee('Hack Night · Berlin Tech — '.config('app.name'), false)
+        ->assertSee('Hack Night · Berlin Tech — Greetup', false)
         ->assertSee('Come hack with us on exciting projects.', false);
 });
 

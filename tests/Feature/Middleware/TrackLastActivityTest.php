@@ -19,7 +19,7 @@ it('updates last_active_at on authenticated request', function () {
 it('does not fail on unauthenticated request', function () {
     $response = $this->get('/');
 
-    $response->assertRedirect('/explore');
+    $response->assertOk();
 });
 
 it('updates last_active_at to current time', function () {

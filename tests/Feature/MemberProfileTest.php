@@ -85,7 +85,7 @@ it('sets correct seo title and meta description from bio', function () {
 
     $this->get("/members/{$member->id}")
         ->assertOk()
-        ->assertSee('Jane Doe — '.config('app.name'), false)
+        ->assertSee('Jane Doe — Greetup', false)
         ->assertSee('A passionate developer who loves open source.', false);
 });
 
@@ -98,7 +98,7 @@ it('uses fallback meta description when no bio', function () {
 
     $this->get("/members/{$member->id}")
         ->assertOk()
-        ->assertSee('John Smith is a member of '.config('app.name').'.', false);
+        ->assertSee('John Smith is a member of Greetup.', false);
 });
 
 // --- Members only visibility ---

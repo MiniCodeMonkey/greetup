@@ -86,7 +86,7 @@ it('displays the correct SEO title', function (): void {
     $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
     $response->assertOk();
-    $response->assertSee('Admin: Dashboard — '.config('app.name', 'Greetup'), false);
+    $response->assertSee('Admin: Dashboard — Greetup', false);
 });
 
 it('shows recent pending reports', function (): void {

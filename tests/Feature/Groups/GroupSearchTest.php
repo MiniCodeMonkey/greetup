@@ -28,7 +28,7 @@ it('shows correct SEO title', function (): void {
     $response = $this->get(route('groups.index'));
 
     $response->assertStatus(200)
-        ->assertSee('Browse Groups — '.config('app.name'), false);
+        ->assertSee('Browse Groups — Greetup', false);
 });
 
 it('displays public active groups', function (): void {

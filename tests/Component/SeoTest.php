@@ -1,5 +1,12 @@
 <?php
 
+use App\Models\Setting;
+use Illuminate\Support\Facades\Cache;
+
+beforeEach(function () {
+    Cache::put(Setting::CACHE_KEY, Setting::DEFAULTS);
+});
+
 it('renders title tag', function () {
     $view = $this->blade('<x-seo title="My Event" description="A great event" />');
 
@@ -18,10 +25,10 @@ it('renders canonical url when provided', function () {
     $view->assertSee('<link rel="canonical" href="https://example.com/events/1">', false);
 });
 
-it('does not render canonical link when not provided', function () {
+it('renders canonical url from current url when not explicitly provided', function () {
     $view = $this->blade('<x-seo title="My Event" description="A great event" />');
 
-    $view->assertDontSee('rel="canonical"', false);
+    $view->assertSee('rel="canonical"', false);
 });
 
 it('renders open graph tags', function () {
@@ -83,10 +90,14 @@ it('does not render json-ld when not provided', function () {
     $view->assertDontSee('application/ld+json', false);
 });
 
-it('renders og:site_name from config', function () {
-    config(['app.name' => 'Greetup']);
-
+it('renders og:site_name from setting model', function () {
     $view = $this->blade('<x-seo title="My Event" description="A great event" />');
 
     $view->assertSee('<meta property="og:site_name" content="Greetup">', false);
+});
+
+it('renders og:url from current url when no canonical provided', function () {
+    $view = $this->blade('<x-seo title="My Event" description="A great event" />');
+
+    $view->assertSee('<meta property="og:url"', false);
 });

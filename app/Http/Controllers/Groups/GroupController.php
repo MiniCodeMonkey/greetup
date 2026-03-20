@@ -14,6 +14,7 @@ use App\Http\Requests\Groups\RequestToJoinGroupRequest;
 use App\Models\Group;
 use App\Models\GroupJoinRequest;
 use App\Models\GroupNotificationMute;
+use App\Models\Setting;
 use App\Notifications\EventCancelled;
 use App\Notifications\GroupDeleted;
 use App\Services\GroupMembershipService;
@@ -321,7 +322,7 @@ class GroupController extends Controller
 
         $coverPhoto = $group->getFirstMediaUrl('cover_photo', 'header');
 
-        $seoTitle = $group->name.' — '.config('app.name', 'Greetup');
+        $seoTitle = $group->name.' — '.Setting::get('site_name', config('app.name', 'Greetup'));
         $seoDescription = $group->description
             ? Str::limit(strip_tags($group->description), 160)
             : null;

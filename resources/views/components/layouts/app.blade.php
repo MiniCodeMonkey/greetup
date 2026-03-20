@@ -1,6 +1,6 @@
 @props([
-    'title' => config('app.name', 'Greetup'),
-    'description' => 'Find your people. Do the thing. Keep showing up.',
+    'title' => \App\Models\Setting::get('site_name', config('app.name', 'Greetup')),
+    'description' => \App\Models\Setting::get('site_description') ?: 'A free, open source community events platform.',
     'seoImage' => null,
     'seoType' => 'website',
     'canonicalUrl' => null,
