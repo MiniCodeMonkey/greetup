@@ -34,8 +34,8 @@ class PromotedFromWaitlist extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("You're in! Spot opened for {$this->event->title}")
-            ->line("Great news! A spot has opened up and you've been promoted from the waitlist for **{$this->event->title}**.")
+            ->subject("You're in! Spot opened for {$this->event->name}")
+            ->line("Great news! A spot has opened up and you've been promoted from the waitlist for **{$this->event->name}**.")
             ->action('View Event', url("/events/{$this->event->id}"))
             ->line('Your RSVP status has been updated to going.');
     }
@@ -50,7 +50,7 @@ class PromotedFromWaitlist extends Notification implements ShouldQueue
         return [
             'event_id' => $this->event->id,
             'rsvp_id' => $this->rsvp->id,
-            'message' => "You've been promoted from the waitlist for {$this->event->title}.",
+            'message' => "You've been promoted from the waitlist for {$this->event->name}.",
         ];
     }
 }
