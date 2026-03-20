@@ -105,6 +105,7 @@ Route::middleware('auth')->group(function () {
         Route::middleware('groupRole:organizer')->group(function () {
             Route::get('groups/{group:slug}/manage/transfer', [OwnershipTransferController::class, 'edit'])->name('groups.manage.transfer');
             Route::post('groups/{group:slug}/manage/transfer', [OwnershipTransferController::class, 'update'])->name('groups.manage.transfer.update');
+            Route::delete('groups/{group:slug}', [GroupController::class, 'destroy'])->name('groups.destroy');
         });
     });
 });

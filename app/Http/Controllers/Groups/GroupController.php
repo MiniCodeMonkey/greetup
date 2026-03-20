@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Groups;
 
+use App\Enums\EventStatus;
 use App\Enums\GroupRole;
 use App\Enums\GroupVisibility;
 use App\Enums\JoinRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Groups\CreateGroupRequest;
+use App\Http\Requests\Groups\DeleteGroupRequest;
 use App\Http\Requests\Groups\HandleJoinRequestRequest;
 use App\Http\Requests\Groups\RequestToJoinGroupRequest;
 use App\Models\Group;
 use App\Models\GroupJoinRequest;
+use App\Notifications\EventCancelled;
+use App\Notifications\GroupDeleted;
 use App\Services\GroupMembershipService;
 use App\Services\MarkdownService;
 use Illuminate\Http\RedirectResponse;
@@ -137,6 +141,42 @@ class GroupController extends Controller
 
         return redirect()->route('groups.show', $group)
             ->with('status', 'Join request denied.');
+    }
+
+    /**
+     * Delete a group (soft-delete).
+     */
+    public function destroy(DeleteGroupRequest $request, Group $group): RedirectResponse
+    {
+        $members = $group->members()
+            ->where('group_members.is_banned', false)
+            ->get();
+
+        $upcomingEvents = $group->events()
+            ->where('starts_at', '>', now())
+            ->whereNull('cancelled_at')
+            ->get();
+
+        foreach ($upcomingEvents as $event) {
+            $event->update([
+                'status' => EventStatus::Cancelled,
+                'cancelled_at' => now(),
+                'cancellation_reason' => 'Group deleted by organizer.',
+            ]);
+
+            foreach ($members as $member) {
+                $member->notify(new EventCancelled($event, $group));
+            }
+        }
+
+        foreach ($members as $member) {
+            $member->notify(new GroupDeleted($group));
+        }
+
+        $group->delete();
+
+        return redirect()->route('dashboard')
+            ->with('status', "The group {$group->name} has been deleted.");
     }
 
     /**
