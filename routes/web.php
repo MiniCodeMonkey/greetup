@@ -19,6 +19,7 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\Messages\ConversationController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Livewire\ExplorePage;
+use App\Livewire\GroupSearchPage;
 use App\Models\Conversation;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -149,6 +150,7 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+Route::livewire('/groups', GroupSearchPage::class)->name('groups.index');
 Route::get('groups/{group:slug}', [GroupController::class, 'show'])->name('groups.show');
 Route::get('groups/{group:slug}/events/{event:slug}', [EventController::class, 'show'])->name('events.show');
 Route::get('groups/{group:slug}/events/{event:slug}/calendar', [EventController::class, 'calendar'])->name('events.calendar');
