@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminGroupController;
+use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -168,6 +169,13 @@ Route::middleware('auth')->group(function () {
             Route::get('admin/groups', [AdminGroupController::class, 'index'])->name('admin.groups.index');
             Route::get('admin/groups/{group}', [AdminGroupController::class, 'show'])->name('admin.groups.show');
             Route::delete('admin/groups/{group}', [AdminGroupController::class, 'destroy'])->name('admin.groups.destroy');
+
+            Route::get('admin/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
+            Route::post('admin/reports/{report}/review', [AdminReportController::class, 'review'])->name('admin.reports.review');
+            Route::post('admin/reports/{report}/resolve', [AdminReportController::class, 'resolve'])->name('admin.reports.resolve');
+            Route::post('admin/reports/{report}/dismiss', [AdminReportController::class, 'dismiss'])->name('admin.reports.dismiss');
+            Route::post('admin/reports/{report}/suspend-user', [AdminReportController::class, 'suspendUser'])->name('admin.reports.suspend-user');
+            Route::post('admin/reports/{report}/delete-content', [AdminReportController::class, 'deleteContent'])->name('admin.reports.delete-content');
         });
     });
 });
