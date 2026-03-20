@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Groups\GroupController;
+use App\Http\Controllers\Groups\GroupJoinRequestController;
+use App\Http\Controllers\Groups\GroupMemberManagementController;
 use App\Http\Controllers\Groups\GroupSettingsController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\Settings\SettingsController;
@@ -77,6 +79,18 @@ Route::middleware('auth')->group(function () {
         Route::post('groups/{group:slug}/request-join', [GroupController::class, 'requestJoin'])->name('groups.request-join');
         Route::post('groups/{group:slug}/join-requests/{joinRequest}/approve', [GroupController::class, 'approveRequest'])->name('groups.join-requests.approve');
         Route::post('groups/{group:slug}/join-requests/{joinRequest}/deny', [GroupController::class, 'denyRequest'])->name('groups.join-requests.deny');
+
+        Route::middleware('groupRole:assistant_organizer')->group(function () {
+            Route::get('groups/{group:slug}/manage/members', [GroupMemberManagementController::class, 'index'])->name('groups.manage.members');
+            Route::get('groups/{group:slug}/manage/members/export', [GroupMemberManagementController::class, 'export'])->name('groups.manage.members.export');
+            Route::post('groups/{group:slug}/manage/members/{user}/remove', [GroupMemberManagementController::class, 'remove'])->name('groups.manage.members.remove');
+            Route::post('groups/{group:slug}/manage/members/{user}/ban', [GroupMemberManagementController::class, 'ban'])->name('groups.manage.members.ban');
+            Route::post('groups/{group:slug}/manage/members/{user}/unban', [GroupMemberManagementController::class, 'unban'])->name('groups.manage.members.unban');
+
+            Route::get('groups/{group:slug}/manage/requests', [GroupJoinRequestController::class, 'index'])->name('groups.manage.requests');
+            Route::post('groups/{group:slug}/manage/requests/{joinRequest}/approve', [GroupJoinRequestController::class, 'approve'])->name('groups.manage.requests.approve');
+            Route::post('groups/{group:slug}/manage/requests/{joinRequest}/deny', [GroupJoinRequestController::class, 'deny'])->name('groups.manage.requests.deny');
+        });
 
         Route::middleware('groupRole:co_organizer')->group(function () {
             Route::get('groups/{group:slug}/manage/settings', [GroupSettingsController::class, 'edit'])->name('groups.manage.settings');

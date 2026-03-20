@@ -24,7 +24,7 @@ it('exports members CSV with correct headers', function (): void {
     $csv = $this->service->exportMembers($group);
 
     $lines = explode("\n", trim($csv));
-    expect($lines[0])->toBe('Name,Email,"Joined Date","Events Attended"');
+    expect($lines[0])->toBe('Name,Email,"Joined Date","Events Attended",No-Shows');
 });
 
 it('exports members with attendance stats', function (): void {

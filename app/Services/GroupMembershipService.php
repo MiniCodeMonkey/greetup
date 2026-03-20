@@ -14,6 +14,8 @@ use App\Models\User;
 use App\Notifications\JoinRequestApproved;
 use App\Notifications\JoinRequestDenied;
 use App\Notifications\JoinRequestReceived;
+use App\Notifications\MemberBanned;
+use App\Notifications\MemberRemoved;
 use App\Notifications\WelcomeToGroup;
 use InvalidArgumentException;
 
@@ -230,6 +232,68 @@ class GroupMembershipService
         $group->members()->updateExistingPivot($user->id, [
             'role' => $newRole->value,
         ]);
+    }
+
+    /**
+     * Remove a member from a group (with optional reason).
+     */
+    public function removeMember(Group $group, User $member, User $reviewer, ?string $reason = null): void
+    {
+        if (! $this->isMember($group, $member)) {
+            throw new InvalidArgumentException('User is not a member of this group.');
+        }
+
+        if ($group->organizer_id === $member->id) {
+            throw new InvalidArgumentException('Cannot remove the group organizer.');
+        }
+
+        $this->cancelUpcomingRsvps($group, $member);
+
+        $group->members()->detach($member);
+
+        $member->notify(new MemberRemoved($group, $reason));
+    }
+
+    /**
+     * Ban a member from a group (prevents rejoin).
+     */
+    public function banMember(Group $group, User $member, User $reviewer, string $reason): void
+    {
+        if ($group->organizer_id === $member->id) {
+            throw new InvalidArgumentException('Cannot ban the group organizer.');
+        }
+
+        $this->cancelUpcomingRsvps($group, $member);
+
+        if ($this->isMember($group, $member)) {
+            $group->members()->updateExistingPivot($member->id, [
+                'is_banned' => true,
+                'banned_at' => now(),
+                'banned_reason' => $reason,
+                'role' => GroupRole::Member->value,
+            ]);
+        } else {
+            $group->members()->attach($member, [
+                'role' => GroupRole::Member->value,
+                'is_banned' => true,
+                'banned_at' => now(),
+                'banned_reason' => $reason,
+            ]);
+        }
+
+        $member->notify(new MemberBanned($group, $reason));
+    }
+
+    /**
+     * Unban a member from a group.
+     */
+    public function unbanMember(Group $group, User $member): void
+    {
+        if (! $this->isBanned($group, $member)) {
+            throw new InvalidArgumentException('User is not banned from this group.');
+        }
+
+        $group->members()->detach($member);
     }
 
     /**

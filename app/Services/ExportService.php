@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\RsvpStatus;
+use App\Enums\AttendanceResult;
 use App\Models\Event;
 use App\Models\Group;
 
@@ -22,15 +22,21 @@ class ExportService
         $eventIds = $group->events()->pluck('id');
 
         $handle = fopen('php://temp', 'r+');
-        fputcsv($handle, ['Name', 'Email', 'Joined Date', 'Events Attended']);
+        fputcsv($handle, ['Name', 'Email', 'Joined Date', 'Events Attended', 'No-Shows']);
 
         foreach ($members as $member) {
             $attendedCount = 0;
+            $noShowCount = 0;
 
             if ($eventIds->isNotEmpty()) {
                 $attendedCount = $member->rsvps()
                     ->whereIn('event_id', $eventIds)
-                    ->where('status', RsvpStatus::Going)
+                    ->where('attended', AttendanceResult::Attended)
+                    ->count();
+
+                $noShowCount = $member->rsvps()
+                    ->whereIn('event_id', $eventIds)
+                    ->where('attended', AttendanceResult::NoShow)
                     ->count();
             }
 
@@ -42,6 +48,7 @@ class ExportService
                 $member->email,
                 $joinedDate,
                 $attendedCount,
+                $noShowCount,
             ]);
         }
 
