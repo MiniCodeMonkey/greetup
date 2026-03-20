@@ -60,5 +60,6 @@ Route::middleware('auth')->group(function () {
         Route::get('settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
         Route::put('settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account.update');
+        Route::put('settings/privacy', [SettingsController::class, 'updatePrivacy'])->name('settings.privacy.update');
     });
 });

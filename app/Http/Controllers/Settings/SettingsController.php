@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\UpdateAccountRequest;
+use App\Http\Requests\Settings\UpdatePrivacyRequest;
 use App\Http\Requests\Settings\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -82,5 +83,21 @@ class SettingsController extends Controller
         }
 
         return redirect()->route('settings', ['section' => 'account']);
+    }
+
+    /**
+     * Update the user's privacy settings.
+     */
+    public function updatePrivacy(UpdatePrivacyRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+        $validated = $request->validated();
+
+        $user->update([
+            'profile_visibility' => $validated['profile_visibility'],
+        ]);
+
+        return redirect()->route('settings', ['section' => 'privacy'])
+            ->with('status', 'Privacy settings updated successfully.');
     }
 }
