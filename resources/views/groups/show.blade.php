@@ -54,25 +54,38 @@
             <div class="shrink-0">
                 @auth
                     @if ($isMember)
-                        <form method="POST" action="{{ route('groups.show', $group) }}" data-testid="leave-form">
-                            @csrf
-                            @php
-                                $canLeave = $membership->role instanceof \App\Enums\GroupRole
-                                    ? $membership->role !== \App\Enums\GroupRole::Organizer
-                                    : $membership->role !== \App\Enums\GroupRole::Organizer->value;
-                            @endphp
-                            @if ($canLeave)
+                        <div class="flex items-center gap-2">
+                            <form method="POST" action="{{ route('groups.toggle-mute', $group) }}" data-testid="mute-form">
+                                @csrf
                                 <button
-                                    type="button"
-                                    class="inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+                                    type="submit"
+                                    class="inline-flex items-center rounded-md px-4 py-2 text-sm font-medium {{ $isMuted ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-700 hover:bg-neutral-100' }}"
                                     style="border: 0.5px solid var(--color-neutral-200)"
-                                    data-testid="leave-button"
-                                    onclick="if(confirm('Are you sure you want to leave this group?')) { this.closest('form').submit(); }"
+                                    data-testid="mute-toggle"
                                 >
-                                    Leave Group
+                                    {{ $isMuted ? 'Unmute Notifications' : 'Mute Notifications' }}
                                 </button>
-                            @endif
-                        </form>
+                            </form>
+                            <form method="POST" action="{{ route('groups.show', $group) }}" data-testid="leave-form">
+                                @csrf
+                                @php
+                                    $canLeave = $membership->role instanceof \App\Enums\GroupRole
+                                        ? $membership->role !== \App\Enums\GroupRole::Organizer
+                                        : $membership->role !== \App\Enums\GroupRole::Organizer->value;
+                                @endphp
+                                @if ($canLeave)
+                                    <button
+                                        type="button"
+                                        class="inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+                                        style="border: 0.5px solid var(--color-neutral-200)"
+                                        data-testid="leave-button"
+                                        onclick="if(confirm('Are you sure you want to leave this group?')) { this.closest('form').submit(); }"
+                                    >
+                                        Leave Group
+                                    </button>
+                                @endif
+                            </form>
+                        </div>
                     @else
                         @if ($pendingRequest)
                             <span

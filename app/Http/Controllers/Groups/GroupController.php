@@ -13,6 +13,7 @@ use App\Http\Requests\Groups\HandleJoinRequestRequest;
 use App\Http\Requests\Groups\RequestToJoinGroupRequest;
 use App\Models\Group;
 use App\Models\GroupJoinRequest;
+use App\Models\GroupNotificationMute;
 use App\Notifications\EventCancelled;
 use App\Notifications\GroupDeleted;
 use App\Services\GroupMembershipService;
@@ -180,6 +181,33 @@ class GroupController extends Controller
     }
 
     /**
+     * Toggle notification muting for a group.
+     */
+    public function toggleMute(Request $request, Group $group): RedirectResponse
+    {
+        $user = $request->user();
+
+        $deleted = GroupNotificationMute::query()
+            ->where('user_id', $user->id)
+            ->where('group_id', $group->id)
+            ->delete();
+
+        if ($deleted === 0) {
+            GroupNotificationMute::create([
+                'user_id' => $user->id,
+                'group_id' => $group->id,
+                'created_at' => now(),
+            ]);
+
+            return redirect()->route('groups.show', $group)
+                ->with('status', 'Notifications muted for this group.');
+        }
+
+        return redirect()->route('groups.show', $group)
+            ->with('status', 'Notifications unmuted for this group.');
+    }
+
+    /**
      * Display the group page.
      */
     public function show(Request $request, Group $group): View
@@ -208,6 +236,11 @@ class GroupController extends Controller
                 }
             }
         }
+
+        $isMuted = $user && $isMember && GroupNotificationMute::query()
+            ->where('user_id', $user->id)
+            ->where('group_id', $group->id)
+            ->exists();
 
         $isPrivate = $group->visibility === GroupVisibility::Private;
 
@@ -297,6 +330,7 @@ class GroupController extends Controller
         return view('groups.show', [
             'group' => $group,
             'isMember' => $isMember,
+            'isMuted' => $isMuted,
             'membership' => $membership,
             'pendingRequest' => $pendingRequest,
             'membershipQuestions' => $membershipQuestions,
