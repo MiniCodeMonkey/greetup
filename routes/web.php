@@ -18,6 +18,7 @@ use App\Http\Controllers\Groups\OwnershipTransferController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\Messages\ConversationController;
 use App\Http\Controllers\Settings\SettingsController;
+use App\Livewire\DashboardPage;
 use App\Livewire\ExplorePage;
 use App\Livewire\GlobalSearch;
 use App\Livewire\GroupSearchPage;
@@ -27,11 +28,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (auth()->guest()) {
-        return redirect('/explore');
+    if (auth()->check()) {
+        return redirect('/dashboard');
     }
 
-    return view('welcome');
+    return redirect('/explore');
 });
 
 Route::livewire('/explore', ExplorePage::class)->name('explore');
@@ -79,9 +80,7 @@ Route::middleware('auth')->group(function () {
             return back()->with('status', 'verification-link-sent');
         })->middleware('throttle:6,1')->name('verification.send');
 
-        Route::get('dashboard', function () {
-            return view('welcome');
-        })->name('dashboard');
+        Route::livewire('dashboard', DashboardPage::class)->name('dashboard');
 
         Route::get('settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
