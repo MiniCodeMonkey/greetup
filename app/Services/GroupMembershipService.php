@@ -16,6 +16,7 @@ use App\Notifications\JoinRequestDenied;
 use App\Notifications\JoinRequestReceived;
 use App\Notifications\MemberBanned;
 use App\Notifications\MemberRemoved;
+use App\Notifications\OwnershipTransferred;
 use App\Notifications\WelcomeToGroup;
 use InvalidArgumentException;
 
@@ -294,6 +295,26 @@ class GroupMembershipService
         }
 
         $group->members()->detach($member);
+    }
+
+    /**
+     * Transfer group ownership to a co-organizer.
+     */
+    public function transferOwnership(Group $group, User $newOwner): void
+    {
+        $previousOwner = $group->organizer;
+
+        $group->update(['organizer_id' => $newOwner->id]);
+
+        $group->members()->updateExistingPivot($newOwner->id, [
+            'role' => GroupRole::Organizer->value,
+        ]);
+
+        $group->members()->updateExistingPivot($previousOwner->id, [
+            'role' => GroupRole::CoOrganizer->value,
+        ]);
+
+        $newOwner->notify(new OwnershipTransferred($group));
     }
 
     /**
