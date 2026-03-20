@@ -1,7 +1,8 @@
 @props(['event'])
 
 @php
-    $eventType = $event->event_type ?? 'in_person';
+    $eventTypeRaw = $event->event_type ?? 'in_person';
+    $eventType = $eventTypeRaw instanceof \BackedEnum ? $eventTypeRaw->value : $eventTypeRaw;
 
     $headerColors = [
         'hybrid' => 'bg-green-900',
@@ -28,7 +29,7 @@
     $group = $event->group;
     $rsvps = $event->rsvps ?? collect();
     $goingCount = $rsvps->count();
-    $capacity = $event->capacity ?? null;
+    $capacity = $event->rsvp_limit ?? null;
 
     $almostFull = false;
     $spotsLeft = null;
@@ -41,7 +42,7 @@
         $spotsLimited = ($spotsLeft / $capacity) < 0.25;
     }
 
-    $eventUrl = $event->url ?? '#';
+    $eventUrl = $group ? route('events.show', ['group' => $group->slug, 'event' => $event->slug]) : '#';
     $startsAt = $event->starts_at;
 @endphp
 
@@ -72,7 +73,7 @@
 
         {{-- Title --}}
         <h3 class="text-neutral-900 font-medium mt-1" style="font-size: 15px;">
-            {{ $event->title }}
+            {{ $event->name }}
         </h3>
 
         {{-- Group name --}}

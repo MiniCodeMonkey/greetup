@@ -30,10 +30,14 @@ use App\Livewire\ExplorePage;
 use App\Livewire\GlobalSearch;
 use App\Livewire\GroupSearchPage;
 use App\Models\Conversation;
+use App\Models\Event;
+use App\Models\Group;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Spatie\Tags\Tag;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -43,9 +47,29 @@ Route::get('/', function () {
     $siteName = Setting::get('site_name', config('app.name', 'Greetup'));
     $description = Setting::get('site_description') ?: 'A free, open source community events platform.';
 
+    $stats = [
+        'groups' => Group::count(),
+        'events' => Event::count(),
+        'members' => User::count(),
+    ];
+
+    $interests = Tag::getWithType('interest')
+        ->sortByDesc(fn (Tag $tag) => $tag->getAttribute('order_column'))
+        ->take(20)
+        ->values();
+
+    $upcomingEvents = Event::upcoming()
+        ->with(['group', 'rsvps'])
+        ->orderBy('starts_at')
+        ->limit(6)
+        ->get();
+
     return view('home', [
         'title' => "{$siteName} — Find your people",
         'description' => $description,
+        'stats' => $stats,
+        'interests' => $interests,
+        'upcomingEvents' => $upcomingEvents,
     ]);
 })->name('home');
 
