@@ -9,6 +9,7 @@
     "sail": false,
     "skills": [
         "scout-development",
+        "livewire-development",
         "pest-testing",
         "tailwindcss-development"
     ]

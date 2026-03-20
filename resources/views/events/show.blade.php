@@ -87,9 +87,7 @@
                 {{-- CTA row --}}
                 <div class="mt-6 flex flex-wrap items-center gap-3">
                     @if ($event->status !== \App\Enums\EventStatus::Cancelled)
-                        <a href="#" class="inline-flex items-center rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700" data-testid="rsvp-button">
-                            RSVP
-                        </a>
+                        <livewire:rsvp-button :event="$event" />
                     @endif
                     <a href="{{ route('events.calendar', [$group, $event]) }}" class="inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100" style="border: 0.5px solid var(--color-neutral-200);" data-testid="add-to-calendar">
                         Add to Calendar

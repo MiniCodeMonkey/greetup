@@ -17,6 +17,7 @@
         "laravel/scout": "^11.1",
         "laravel/tinker": "^3.0",
         "league/commonmark": "^2.8",
+        "livewire/livewire": "^4.2",
         "rlanvin/php-rrule": "^2.6",
         "spatie/laravel-medialibrary": "^11.21",
         "spatie/laravel-permission": "^7.2",
