@@ -246,6 +246,62 @@
                 </div>
             </div>
 
+            {{-- Recurring Event --}}
+            <div>
+                <label class="flex items-center gap-2">
+                    <input type="hidden" name="is_recurring" value="0" />
+                    <input type="checkbox" id="is_recurring" name="is_recurring" value="1" {{ old('is_recurring') ? 'checked' : '' }} class="rounded border-neutral-200 text-green-500 focus:ring-green-500" />
+                    <span class="text-sm font-medium text-neutral-700">Make this recurring</span>
+                </label>
+                @error('is_recurring')
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+
+                <div id="recurrence_fields" class="mt-4 space-y-4" style="display: none;">
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700">Recurrence Pattern</label>
+                        <div class="mt-2 space-y-2">
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="recurrence_pattern" value="weekly" {{ old('recurrence_pattern') === 'weekly' ? 'checked' : '' }} class="text-green-500 focus:ring-green-500" />
+                                <span class="text-sm text-neutral-700">Weekly</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="recurrence_pattern" value="biweekly" {{ old('recurrence_pattern') === 'biweekly' ? 'checked' : '' }} class="text-green-500 focus:ring-green-500" />
+                                <span class="text-sm text-neutral-700">Biweekly</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="recurrence_pattern" value="monthly" {{ old('recurrence_pattern') === 'monthly' ? 'checked' : '' }} class="text-green-500 focus:ring-green-500" />
+                                <span class="text-sm text-neutral-700">Monthly</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="recurrence_pattern" value="custom" {{ old('recurrence_pattern') === 'custom' ? 'checked' : '' }} class="text-green-500 focus:ring-green-500" />
+                                <span class="text-sm text-neutral-700">Custom RRULE</span>
+                            </label>
+                        </div>
+                        @error('recurrence_pattern')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div id="custom_rrule_field" style="display: none;">
+                        <label for="custom_rrule" class="block text-sm font-medium text-neutral-700">Custom RRULE String</label>
+                        <input
+                            type="text"
+                            id="custom_rrule"
+                            name="custom_rrule"
+                            value="{{ old('custom_rrule') }}"
+                            placeholder="e.g. FREQ=WEEKLY;INTERVAL=3;BYDAY=FR"
+                            class="mt-1 block w-full rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none font-mono"
+                        />
+                        @error('custom_rrule')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <p class="text-xs text-neutral-400">Recurring events generate instances for the next 3 months.</p>
+                </div>
+            </div>
+
             {{-- Chat & Comments --}}
             <div class="space-y-3">
                 <label class="flex items-center gap-2">
@@ -294,6 +350,28 @@
             });
 
             toggleConditionalFields();
+
+            const isRecurringCheckbox = document.getElementById('is_recurring');
+            const recurrenceFields = document.getElementById('recurrence_fields');
+            const patternRadios = document.querySelectorAll('input[name="recurrence_pattern"]');
+            const customRruleField = document.getElementById('custom_rrule_field');
+
+            function toggleRecurrenceFields() {
+                recurrenceFields.style.display = isRecurringCheckbox.checked ? 'block' : 'none';
+            }
+
+            function toggleCustomRrule() {
+                const selected = document.querySelector('input[name="recurrence_pattern"]:checked');
+                customRruleField.style.display = (selected && selected.value === 'custom') ? 'block' : 'none';
+            }
+
+            isRecurringCheckbox.addEventListener('change', toggleRecurrenceFields);
+            patternRadios.forEach(function (radio) {
+                radio.addEventListener('change', toggleCustomRrule);
+            });
+
+            toggleRecurrenceFields();
+            toggleCustomRrule();
         });
     </script>
     @endpush

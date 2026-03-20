@@ -24,7 +24,7 @@ class EventSeriesFactory extends Factory
                 'FREQ=WEEKLY;BYDAY=TU',
                 'FREQ=WEEKLY;BYDAY=WE',
                 'FREQ=MONTHLY;BYDAY=1MO',
-                'FREQ=BIWEEKLY;BYDAY=TH',
+                'FREQ=WEEKLY;INTERVAL=2;BYDAY=TH',
             ]),
         ];
     }

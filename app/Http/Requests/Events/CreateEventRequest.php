@@ -43,6 +43,9 @@ class CreateEventRequest extends FormRequest
             'is_comments_enabled' => ['boolean'],
             'timezone' => ['nullable', 'string', 'timezone:all'],
             'status' => ['nullable', Rule::in(['draft', 'published'])],
+            'is_recurring' => ['boolean'],
+            'recurrence_pattern' => ['nullable', 'required_if:is_recurring,1', Rule::in(['weekly', 'biweekly', 'monthly', 'custom'])],
+            'custom_rrule' => ['nullable', 'required_if:recurrence_pattern,custom', 'string', 'max:500'],
         ];
     }
 
@@ -70,6 +73,8 @@ class CreateEventRequest extends FormRequest
             'cover_photo.max' => 'The cover photo must not be larger than 5MB.',
             'rsvp_limit.min' => 'RSVP limit must be at least 1.',
             'rsvp_closes_at.after' => 'RSVP close date must be after the RSVP open date.',
+            'recurrence_pattern.required_if' => 'Please select a recurrence pattern when making an event recurring.',
+            'custom_rrule.required_if' => 'A custom RRULE string is required when using a custom recurrence pattern.',
         ];
     }
 }
