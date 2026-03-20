@@ -33,10 +33,15 @@ class EventCancelled extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        $mail = (new MailMessage)
             ->subject("Event cancelled: {$this->event->name}")
-            ->line("The event **{$this->event->name}** in **{$this->group->name}** has been cancelled.")
-            ->line('Reason: The group has been deleted by the organizer.');
+            ->line("The event **{$this->event->name}** in **{$this->group->name}** has been cancelled.");
+
+        if ($this->event->cancellation_reason) {
+            $mail->line("Reason: {$this->event->cancellation_reason}");
+        }
+
+        return $mail;
     }
 
     /**

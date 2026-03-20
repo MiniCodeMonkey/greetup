@@ -10,6 +10,7 @@ use App\Http\Requests\Events\CreateEventRequest;
 use App\Http\Requests\Events\UpdateEventRequest;
 use App\Models\Event;
 use App\Models\Group;
+use App\Notifications\EventCancelled;
 use App\Notifications\EventUpdated;
 use App\Notifications\NewEvent;
 use App\Services\EventSeriesService;
@@ -319,6 +320,8 @@ class EventController extends Controller
                     'cancelled_at' => now(),
                     'cancellation_reason' => $request->input('cancellation_reason'),
                 ]);
+
+                $this->notifyCancelledEventAttendees($futureEvent, $group);
             }
 
             $message = $futureEvents->count().' events cancelled.';
@@ -329,11 +332,29 @@ class EventController extends Controller
                 'cancellation_reason' => $request->input('cancellation_reason'),
             ]);
 
+            $this->notifyCancelledEventAttendees($event, $group);
+
             $message = 'Event cancelled.';
         }
 
         return redirect()->route('groups.show', $group)
             ->with('status', $message);
+    }
+
+    /**
+     * Notify Going/Waitlisted attendees that an event has been cancelled.
+     */
+    private function notifyCancelledEventAttendees(Event $event, Group $group): void
+    {
+        $attendees = $event->rsvps()
+            ->whereIn('status', [RsvpStatus::Going, RsvpStatus::Waitlisted])
+            ->with('user')
+            ->get()
+            ->pluck('user');
+
+        foreach ($attendees as $user) {
+            $user->notify(new EventCancelled($event, $group));
+        }
     }
 
     /**

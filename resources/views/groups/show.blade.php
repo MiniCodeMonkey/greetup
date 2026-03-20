@@ -218,7 +218,12 @@
                         <div class="space-y-4" data-testid="past-events-list">
                             @foreach ($pastEvents as $event)
                                 <div class="rounded-lg px-4 py-3" style="border: 0.5px solid var(--color-neutral-200)">
-                                    <h3 class="text-sm font-medium text-neutral-900">{{ $event->name }}</h3>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-sm font-medium text-neutral-900">{{ $event->name }}</h3>
+                                        @if ($event->status === \App\Enums\EventStatus::Cancelled)
+                                            <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-900" data-testid="cancelled-badge">Cancelled</span>
+                                        @endif
+                                    </div>
                                     <p class="mt-1 text-xs text-neutral-500">{{ $event->starts_at->format('M j, Y \a\t g:i A') }}</p>
                                 </div>
                             @endforeach

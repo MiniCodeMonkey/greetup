@@ -244,7 +244,10 @@ class GroupController extends Controller
 
             if ($tab === 'past') {
                 $pastEvents = $group->events()
-                    ->where('starts_at', '<', now())
+                    ->where(function ($query) {
+                        $query->where('starts_at', '<', now())
+                            ->orWhere('status', EventStatus::Cancelled);
+                    })
                     ->orderByDesc('starts_at')
                     ->limit(20)
                     ->get();
