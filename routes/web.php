@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
         Route::get('settings/data-export', [SettingsController::class, 'exportData'])->name('settings.data-export');
         Route::delete('settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.account.delete');
 
+        Route::get('messages', [ConversationController::class, 'index'])->name('messages.index');
         Route::post('messages', [ConversationController::class, 'store'])->name('messages.store')->middleware('throttle:dm');
         Route::get('messages/{conversation}', fn (Conversation $conversation) => view('messages.show', ['conversation' => $conversation]))->name('messages.show');
 

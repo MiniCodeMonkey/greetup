@@ -7,10 +7,35 @@ use App\Http\Requests\Messages\StartConversationRequest;
 use App\Models\Block;
 use App\Models\Conversation;
 use App\Models\ConversationParticipant;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
 class ConversationController extends Controller
 {
+    public function index(): View
+    {
+        $user = request()->user();
+
+        $conversations = Conversation::whereHas('participants', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+            ->with(['participants.user', 'messages' => function ($query) {
+                $query->latest()->limit(1);
+            }])
+            ->withMax('messages', 'created_at')
+            ->orderByDesc('messages_max_created_at')
+            ->paginate(20);
+
+        $participantMap = ConversationParticipant::where('user_id', $user->id)
+            ->whereIn('conversation_id', $conversations->pluck('id'))
+            ->pluck('last_read_at', 'conversation_id');
+
+        return view('messages.index', [
+            'conversations' => $conversations,
+            'participantMap' => $participantMap,
+        ]);
+    }
+
     public function store(StartConversationRequest $request): RedirectResponse
     {
         $senderId = $request->user()->id;

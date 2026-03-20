@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ConversationParticipant;
 use App\Models\Event;
 use App\Models\EventChatMessage;
 use Illuminate\Support\Facades\Broadcast;
@@ -7,6 +8,12 @@ use Illuminate\Support\Facades\Gate;
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
+});
+
+Broadcast::channel('conversation.{conversationId}', function ($user, int $conversationId) {
+    return ConversationParticipant::where('conversation_id', $conversationId)
+        ->where('user_id', $user->id)
+        ->exists();
 });
 
 Broadcast::channel('event.{eventId}.chat', function ($user, int $eventId) {
