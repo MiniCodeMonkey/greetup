@@ -19,6 +19,7 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\Messages\ConversationController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Livewire\ExplorePage;
+use App\Livewire\GlobalSearch;
 use App\Livewire\GroupSearchPage;
 use App\Models\Conversation;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -34,6 +35,7 @@ Route::get('/', function () {
 });
 
 Route::livewire('/explore', ExplorePage::class)->name('explore');
+Route::livewire('/search', GlobalSearch::class)->name('search');
 
 Route::get('members/{user}', [MemberController::class, 'show'])->name('members.show');
 
