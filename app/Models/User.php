@@ -126,6 +126,14 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     }
 
     /**
+     * @return HasMany<NotificationPreference, $this>
+     */
+    public function notificationPreferences(): HasMany
+    {
+        return $this->hasMany(NotificationPreference::class);
+    }
+
+    /**
      * @return BelongsToMany<Conversation, $this>
      */
     public function conversations(): BelongsToMany

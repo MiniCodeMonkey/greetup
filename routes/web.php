@@ -61,5 +61,6 @@ Route::middleware('auth')->group(function () {
         Route::put('settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
         Route::put('settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account.update');
         Route::put('settings/privacy', [SettingsController::class, 'updatePrivacy'])->name('settings.privacy.update');
+        Route::put('settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
     });
 });
