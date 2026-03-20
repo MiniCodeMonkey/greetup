@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Groups\GroupAnalyticsController;
 use App\Http\Controllers\Groups\GroupController;
 use App\Http\Controllers\Groups\GroupJoinRequestController;
 use App\Http\Controllers\Groups\GroupMemberManagementController;
@@ -100,6 +101,8 @@ Route::middleware('auth')->group(function () {
 
             Route::get('groups/{group:slug}/manage/team', [LeadershipTeamController::class, 'index'])->name('groups.manage.team');
             Route::post('groups/{group:slug}/manage/team/{user}/role', [LeadershipTeamController::class, 'update'])->name('groups.manage.team.update-role');
+
+            Route::get('groups/{group:slug}/manage/analytics', [GroupAnalyticsController::class, 'index'])->name('groups.manage.analytics');
         });
 
         Route::middleware('groupRole:organizer')->group(function () {
