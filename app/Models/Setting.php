@@ -33,6 +33,7 @@ class Setting extends Model
         'max_groups_per_user' => null,
         'default_timezone' => 'UTC',
         'default_locale' => 'en',
+        'support_url' => null,
     ];
 
     /**

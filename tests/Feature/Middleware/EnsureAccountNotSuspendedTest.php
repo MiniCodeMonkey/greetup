@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Setting;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
@@ -59,4 +60,42 @@ it('applies to all authenticated routes', function () {
     $response = $this->actingAs($user)->get(route('verification.notice'));
 
     $response->assertRedirect(route('suspended'));
+});
+
+it('shows minimal nav with only logo and logout', function () {
+    $user = User::factory()->suspended()->create();
+
+    $response = $this->actingAs($user)->get(route('suspended'));
+
+    $response->assertOk();
+    $response->assertSee(asset('images/greetup.png'));
+    $response->assertSee('Log out');
+    $response->assertDontSee('Explore');
+    $response->assertDontSee('Groups');
+    $response->assertDontSee('Dashboard');
+});
+
+it('shows contact support link when configured in platform settings', function () {
+    Setting::query()->updateOrCreate(['key' => 'support_url'], ['value' => 'https://support.example.com']);
+    Setting::clearCache();
+
+    $user = User::factory()->suspended()->create();
+
+    $response = $this->actingAs($user)->get(route('suspended'));
+
+    $response->assertOk();
+    $response->assertSee('Contact support');
+    $response->assertSee('https://support.example.com');
+});
+
+it('hides contact support link when not configured', function () {
+    Setting::query()->where('key', 'support_url')->delete();
+    Setting::clearCache();
+
+    $user = User::factory()->suspended()->create();
+
+    $response = $this->actingAs($user)->get(route('suspended'));
+
+    $response->assertOk();
+    $response->assertDontSee('Contact support');
 });
