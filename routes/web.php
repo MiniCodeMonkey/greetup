@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Settings\SettingsController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -55,5 +56,9 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', function () {
             return view('welcome');
         })->name('dashboard');
+
+        Route::get('settings', [SettingsController::class, 'index'])->name('settings');
+        Route::put('settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+        Route::put('settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account.update');
     });
 });
