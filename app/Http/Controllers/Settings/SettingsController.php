@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Settings\DeleteAccountRequest;
 use App\Http\Requests\Settings\UpdateAccountRequest;
 use App\Http\Requests\Settings\UpdateNotificationPreferencesRequest;
 use App\Http\Requests\Settings\UpdatePrivacyRequest;
@@ -10,6 +11,7 @@ use App\Http\Requests\Settings\UpdateProfileRequest;
 use App\Models\NotificationPreference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Spatie\Tags\Tag;
 
@@ -197,5 +199,22 @@ class SettingsController extends Controller
 
         return redirect()->route('settings', ['section' => 'privacy'])
             ->with('status', 'Privacy settings updated successfully.');
+    }
+
+    /**
+     * Delete the user's account (soft delete with 30-day grace period).
+     */
+    public function deleteAccount(DeleteAccountRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        Auth::logout();
+
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')->with('status', 'Your account has been scheduled for deletion. You have 30 days to change your mind.');
     }
 }

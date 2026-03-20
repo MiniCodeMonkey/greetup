@@ -62,5 +62,6 @@ Route::middleware('auth')->group(function () {
         Route::put('settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account.update');
         Route::put('settings/privacy', [SettingsController::class, 'updatePrivacy'])->name('settings.privacy.update');
         Route::put('settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
+        Route::delete('settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.account.delete');
     });
 });
