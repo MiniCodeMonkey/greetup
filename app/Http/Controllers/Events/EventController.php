@@ -87,18 +87,22 @@ class EventController extends Controller
     {
         abort_unless($event->group_id === $group->id, 404);
 
-        $tz = $event->timezone ?? 'UTC';
-        $dtStart = $event->starts_at->setTimezone($tz)->format('Ymd\THis');
+        $dtStart = $event->starts_at->utc()->format('Ymd\THis\Z');
         $dtEnd = $event->ends_at
-            ? $event->ends_at->setTimezone($tz)->format('Ymd\THis')
-            : $event->starts_at->setTimezone($tz)->addHours(2)->format('Ymd\THis');
+            ? $event->ends_at->utc()->format('Ymd\THis\Z')
+            : $event->starts_at->utc()->addHours(2)->format('Ymd\THis\Z');
         $now = now()->utc()->format('Ymd\THis\Z');
         $uid = $event->id.'@'.config('app.url');
         $summary = $this->escapeIcs($event->name);
         $description = $this->escapeIcs(strip_tags($event->description ?? ''));
-        $location = $this->escapeIcs($event->venue_name ? ($event->venue_name.($event->venue_address ? ', '.$event->venue_address : '')) : ($event->online_link ?? ''));
+        $organizer = $this->escapeIcs($event->group->name);
 
-        $ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Greetup//Event//EN\r\nBEGIN:VEVENT\r\nUID:{$uid}\r\nDTSTAMP:{$now}\r\nDTSTART;TZID={$tz}:{$dtStart}\r\nDTEND;TZID={$tz}:{$dtEnd}\r\nSUMMARY:{$summary}\r\nDESCRIPTION:{$description}\r\nLOCATION:{$location}\r\nEND:VEVENT\r\nEND:VCALENDAR";
+        $location = match ($event->event_type) {
+            EventType::Online => $this->escapeIcs($event->online_link ?? ''),
+            default => $this->escapeIcs($event->venue_address ?? ($event->venue_name ?? '')),
+        };
+
+        $ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Greetup//Event//EN\r\nBEGIN:VEVENT\r\nUID:{$uid}\r\nDTSTAMP:{$now}\r\nDTSTART:{$dtStart}\r\nDTEND:{$dtEnd}\r\nSUMMARY:{$summary}\r\nDESCRIPTION:{$description}\r\nLOCATION:{$location}\r\nORGANIZER:{$organizer}\r\nEND:VEVENT\r\nEND:VCALENDAR";
 
         $filename = Str::slug($event->name).'.ics';
 
