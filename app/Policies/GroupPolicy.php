@@ -58,9 +58,9 @@ class GroupPolicy
     }
 
     /**
-     * Any user can view a group.
+     * Anyone (including guests) can view a group.
      */
-    public function view(User $user, Group $group): bool
+    public function view(?User $user, Group $group): bool
     {
         return true;
     }

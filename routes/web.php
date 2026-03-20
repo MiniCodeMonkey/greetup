@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('groups/create', [GroupController::class, 'create'])->name('groups.create');
         Route::post('groups', [GroupController::class, 'store'])->name('groups.store');
-        Route::get('groups/{group:slug}', [GroupController::class, 'show'])->name('groups.show');
     });
 });
+
+Route::get('groups/{group:slug}', [GroupController::class, 'show'])->name('groups.show');
