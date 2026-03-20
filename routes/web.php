@@ -18,14 +18,21 @@ use App\Http\Controllers\Groups\OwnershipTransferController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\Messages\ConversationController;
 use App\Http\Controllers\Settings\SettingsController;
+use App\Livewire\ExplorePage;
 use App\Models\Conversation;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (auth()->guest()) {
+        return redirect('/explore');
+    }
+
     return view('welcome');
 });
+
+Route::livewire('/explore', ExplorePage::class)->name('explore');
 
 Route::get('members/{user}', [MemberController::class, 'show'])->name('members.show');
 
