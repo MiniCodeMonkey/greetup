@@ -4,9 +4,12 @@ namespace App\Services;
 
 use App\Enums\GroupRole;
 use App\Enums\JoinRequestStatus;
+use App\Enums\RsvpStatus;
+use App\Jobs\PromoteFromWaitlist;
 use App\Models\Group;
 use App\Models\GroupJoinRequest;
 use App\Models\GroupMembershipAnswer;
+use App\Models\Rsvp;
 use App\Models\User;
 use App\Notifications\JoinRequestApproved;
 use App\Notifications\JoinRequestDenied;
@@ -176,7 +179,43 @@ class GroupMembershipService
             throw new InvalidArgumentException('The group organizer must transfer ownership before leaving.');
         }
 
+        $this->cancelUpcomingRsvps($group, $user);
+
         $group->members()->detach($user);
+    }
+
+    /**
+     * Cancel upcoming RSVPs for a user leaving a group and trigger waitlist promotion.
+     */
+    private function cancelUpcomingRsvps(Group $group, User $user): void
+    {
+        $upcomingEventIds = $group->events()
+            ->where('starts_at', '>', now())
+            ->pluck('id');
+
+        if ($upcomingEventIds->isEmpty()) {
+            return;
+        }
+
+        $rsvps = Rsvp::query()
+            ->where('user_id', $user->id)
+            ->whereIn('event_id', $upcomingEventIds)
+            ->whereIn('status', [RsvpStatus::Going, RsvpStatus::Waitlisted])
+            ->get();
+
+        foreach ($rsvps as $rsvp) {
+            $wasGoing = $rsvp->status === RsvpStatus::Going;
+
+            $rsvp->update([
+                'status' => RsvpStatus::NotGoing,
+                'guest_count' => 0,
+                'waitlisted_at' => null,
+            ]);
+
+            if ($wasGoing) {
+                PromoteFromWaitlist::dispatch($rsvp->event);
+            }
+        }
     }
 
     /**

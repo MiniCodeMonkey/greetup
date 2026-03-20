@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
         Route::get('groups/create', [GroupController::class, 'create'])->name('groups.create');
         Route::post('groups', [GroupController::class, 'store'])->name('groups.store');
         Route::post('groups/{group:slug}/join', [GroupController::class, 'join'])->name('groups.join');
+        Route::post('groups/{group:slug}/leave', [GroupController::class, 'leave'])->name('groups.leave');
         Route::post('groups/{group:slug}/request-join', [GroupController::class, 'requestJoin'])->name('groups.request-join');
         Route::post('groups/{group:slug}/join-requests/{joinRequest}/approve', [GroupController::class, 'approveRequest'])->name('groups.join-requests.approve');
         Route::post('groups/{group:slug}/join-requests/{joinRequest}/deny', [GroupController::class, 'denyRequest'])->name('groups.join-requests.deny');

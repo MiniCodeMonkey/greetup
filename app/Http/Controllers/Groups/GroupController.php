@@ -92,6 +92,19 @@ class GroupController extends Controller
     }
 
     /**
+     * Leave a group.
+     */
+    public function leave(Request $request, Group $group, GroupMembershipService $membershipService): RedirectResponse
+    {
+        Gate::authorize('leave', $group);
+
+        $membershipService->leaveGroup($group, $request->user());
+
+        return redirect()->route('groups.show', $group)
+            ->with('status', "You've left {$group->name}.");
+    }
+
+    /**
      * Request to join an approval-required group.
      */
     public function requestJoin(RequestToJoinGroupRequest $request, Group $group, GroupMembershipService $membershipService): RedirectResponse
