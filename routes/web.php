@@ -8,6 +8,7 @@ use App\Http\Controllers\Groups\GroupController;
 use App\Http\Controllers\Groups\GroupJoinRequestController;
 use App\Http\Controllers\Groups\GroupMemberManagementController;
 use App\Http\Controllers\Groups\GroupSettingsController;
+use App\Http\Controllers\Groups\LeadershipTeamController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\Settings\SettingsController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -95,6 +96,9 @@ Route::middleware('auth')->group(function () {
         Route::middleware('groupRole:co_organizer')->group(function () {
             Route::get('groups/{group:slug}/manage/settings', [GroupSettingsController::class, 'edit'])->name('groups.manage.settings');
             Route::put('groups/{group:slug}/manage/settings', [GroupSettingsController::class, 'update'])->name('groups.manage.settings.update');
+
+            Route::get('groups/{group:slug}/manage/team', [LeadershipTeamController::class, 'index'])->name('groups.manage.team');
+            Route::post('groups/{group:slug}/manage/team/{user}/role', [LeadershipTeamController::class, 'update'])->name('groups.manage.team.update-role');
         });
     });
 });
