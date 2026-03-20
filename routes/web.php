@@ -82,6 +82,7 @@ Route::middleware('auth')->group(function () {
         Route::post('groups', [GroupController::class, 'store'])->name('groups.store');
         Route::get('groups/{group:slug}/discussions/create', [DiscussionController::class, 'create'])->name('discussions.create');
         Route::post('groups/{group:slug}/discussions', [DiscussionController::class, 'store'])->name('discussions.store');
+        Route::get('groups/{group:slug}/discussions/{discussion:slug}', [DiscussionController::class, 'show'])->name('discussions.show');
 
         Route::post('groups/{group:slug}/join', [GroupController::class, 'join'])->name('groups.join');
         Route::post('groups/{group:slug}/leave', [GroupController::class, 'leave'])->name('groups.leave');

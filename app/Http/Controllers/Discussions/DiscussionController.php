@@ -14,6 +14,19 @@ use Illuminate\View\View;
 class DiscussionController extends Controller
 {
     /**
+     * Show a discussion with its replies.
+     */
+    public function show(Group $group, Discussion $discussion): View
+    {
+        $discussion->load('author');
+
+        return view('discussions.show', [
+            'group' => $group,
+            'discussion' => $discussion,
+        ]);
+    }
+
+    /**
      * Show the discussion creation form.
      */
     public function create(Group $group): View

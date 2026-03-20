@@ -252,7 +252,7 @@
                             @foreach ($discussions as $discussion)
                                 <div class="rounded-lg px-4 py-3" style="border: 0.5px solid var(--color-neutral-200)">
                                     <div class="flex items-center gap-2">
-                                        <h3 class="text-sm font-medium text-neutral-900">{{ $discussion->title }}</h3>
+                                        <a href="{{ route('discussions.show', [$group, $discussion]) }}" class="text-sm font-medium text-neutral-900 hover:text-green-500">{{ $discussion->title }}</a>
                                         @if ($discussion->is_pinned)
                                             <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700" data-testid="pinned-badge">Pinned</span>
                                         @endif
