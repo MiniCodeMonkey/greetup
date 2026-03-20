@@ -156,7 +156,13 @@
                     @endif
 
                     @if ($tab === 'chat')
-                        <p class="text-sm text-neutral-500" data-testid="chat-tab">Chat will be available when the event starts.</p>
+                        <div data-testid="chat-tab">
+                            @if ($event->is_chat_enabled)
+                                <livewire:event-chat :event="$event" />
+                            @else
+                                <p class="text-sm text-neutral-500">Chat is disabled for this event.</p>
+                            @endif
+                        </div>
                     @endif
                 </div>
             </div>
