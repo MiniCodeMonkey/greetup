@@ -27,7 +27,8 @@ class NewDirectMessage extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject("New message from {$this->message->user->name}")
             ->line("{$this->message->user->name} sent you a message.")
-            ->line("\"{$this->message->body}\"");
+            ->line("\"{$this->message->body}\"")
+            ->action('View Messages', url("/messages/{$this->message->conversation_id}"));
     }
 
     /**
@@ -40,6 +41,7 @@ class NewDirectMessage extends Notification implements ShouldQueue
             'conversation_id' => $this->message->conversation_id,
             'user_id' => $this->message->user_id,
             'message' => "{$this->message->user->name} sent you a message.",
+            'link' => "/messages/{$this->message->conversation_id}",
         ];
     }
 }

@@ -54,6 +54,7 @@ class WelcomeToGroup extends Notification implements ShouldQueue
         return [
             'group_id' => $this->group->id,
             'message' => "Welcome to {$this->group->name}!",
+            'link' => "/groups/{$this->group->slug}",
         ];
     }
 }

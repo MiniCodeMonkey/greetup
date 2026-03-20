@@ -40,6 +40,7 @@ class NewEventFeedback extends Notification implements ShouldQueue
             'user_id' => $this->feedback->user_id,
             'rating' => $this->feedback->rating,
             'message' => "{$this->feedback->user->name} left feedback on {$this->event->name}.",
+            'link' => "/groups/{$this->event->group->slug}/events/{$this->event->slug}",
         ];
     }
 }

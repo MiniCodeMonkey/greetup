@@ -39,6 +39,7 @@ class NewDiscussion extends Notification implements ShouldQueue
             'group_id' => $this->group->id,
             'user_id' => $this->discussion->user_id,
             'message' => "{$this->discussion->user->name} started a discussion: {$this->discussion->title}.",
+            'link' => "/groups/{$this->group->slug}/discussions/{$this->discussion->slug}",
         ];
     }
 }

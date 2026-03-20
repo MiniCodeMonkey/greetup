@@ -2,20 +2,19 @@
 
 namespace App\Notifications;
 
-use App\Models\Group;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class MemberBanned extends Notification implements ShouldQueue
+class AccountSuspended extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Group $group, public string $reason) {}
+    public function __construct(public string $reason) {}
 
     /**
      * Get the notification's delivery channels.
@@ -24,7 +23,7 @@ class MemberBanned extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['mail'];
     }
 
     /**
@@ -33,9 +32,10 @@ class MemberBanned extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("You have been banned from {$this->group->name}")
-            ->line("You have been banned from **{$this->group->name}**.")
-            ->line("Reason: {$this->reason}");
+            ->subject('Your account has been suspended')
+            ->line('Your account has been suspended.')
+            ->line("Reason: {$this->reason}")
+            ->line('If you believe this was in error, please contact us.');
     }
 
     /**
@@ -46,10 +46,8 @@ class MemberBanned extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'group_id' => $this->group->id,
-            'message' => "You have been banned from {$this->group->name}.",
+            'message' => 'Your account has been suspended.',
             'reason' => $this->reason,
-            'link' => "/groups/{$this->group->slug}",
         ];
     }
 }

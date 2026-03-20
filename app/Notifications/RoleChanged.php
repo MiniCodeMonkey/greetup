@@ -38,7 +38,8 @@ class RoleChanged extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject("Your role in {$this->group->name} has changed")
-            ->line("Your role in **{$this->group->name}** has been changed from **{$oldLabel}** to **{$newLabel}**.");
+            ->line("Your role in **{$this->group->name}** has been changed from **{$oldLabel}** to **{$newLabel}**.")
+            ->action('View Group', url("/groups/{$this->group->slug}"));
     }
 
     /**
@@ -54,6 +55,7 @@ class RoleChanged extends Notification implements ShouldQueue
         return [
             'group_id' => $this->group->id,
             'message' => "Your role in {$this->group->name} has been changed from {$oldLabel} to {$newLabel}.",
+            'link' => "/groups/{$this->group->slug}",
         ];
     }
 }

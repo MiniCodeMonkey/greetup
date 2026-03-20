@@ -39,6 +39,7 @@ class NewEventComment extends Notification implements ShouldQueue
             'event_id' => $this->event->id,
             'user_id' => $this->comment->user_id,
             'message' => "{$this->comment->user->name} commented on {$this->event->name}.",
+            'link' => "/groups/{$this->event->group->slug}/events/{$this->event->slug}",
         ];
     }
 }

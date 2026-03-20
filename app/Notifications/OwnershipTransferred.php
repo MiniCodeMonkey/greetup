@@ -34,7 +34,8 @@ class OwnershipTransferred extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject("You are now the organizer of {$this->group->name}")
-            ->line("Ownership of **{$this->group->name}** has been transferred to you. You are now the primary organizer.");
+            ->line("Ownership of **{$this->group->name}** has been transferred to you. You are now the primary organizer.")
+            ->action('View Group', url("/groups/{$this->group->slug}"));
     }
 
     /**
@@ -47,6 +48,7 @@ class OwnershipTransferred extends Notification implements ShouldQueue
         return [
             'group_id' => $this->group->id,
             'message' => "Ownership of {$this->group->name} has been transferred to you. You are now the primary organizer.",
+            'link' => "/groups/{$this->group->slug}",
         ];
     }
 }

@@ -36,7 +36,8 @@ class NewDiscussionReply extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject("New reply in discussion: {$this->discussion->title}")
             ->line("{$this->reply->user->name} replied to the discussion **{$this->discussion->title}**.")
-            ->line("\"{$this->reply->body}\"");
+            ->line("\"{$this->reply->body}\"")
+            ->action('View Discussion', url("/groups/{$this->discussion->group->slug}/discussions/{$this->discussion->slug}"));
     }
 
     /**
@@ -52,6 +53,7 @@ class NewDiscussionReply extends Notification implements ShouldQueue
             'group_id' => $this->discussion->group_id,
             'user_id' => $this->reply->user_id,
             'message' => "{$this->reply->user->name} replied to {$this->discussion->title}.",
+            'link' => "/groups/{$this->discussion->group->slug}/discussions/{$this->discussion->slug}",
         ];
     }
 }

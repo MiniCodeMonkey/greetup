@@ -36,7 +36,8 @@ class NewEvent extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject("New event: {$this->event->name}")
             ->line("A new event **{$this->event->name}** has been created in **{$this->group->name}**.")
-            ->line("It starts on {$this->event->starts_at->format('M j, Y g:i A')}.");
+            ->line("It starts on {$this->event->starts_at->format('M j, Y g:i A')}.")
+            ->action('View Event', url("/groups/{$this->group->slug}/events/{$this->event->slug}"));
     }
 
     /**
@@ -50,6 +51,7 @@ class NewEvent extends Notification implements ShouldQueue
             'event_id' => $this->event->id,
             'group_id' => $this->group->id,
             'message' => "New event: {$this->event->name} in {$this->group->name}.",
+            'link' => "/groups/{$this->group->slug}/events/{$this->event->slug}",
         ];
     }
 }

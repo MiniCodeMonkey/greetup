@@ -56,6 +56,7 @@ class JoinRequestDenied extends Notification implements ShouldQueue
             'group_id' => $this->joinRequest->group_id,
             'join_request_id' => $this->joinRequest->id,
             'message' => "Your request to join {$this->joinRequest->group->name} was not approved.",
+            'link' => "/groups/{$this->joinRequest->group->slug}",
         ];
 
         if ($this->joinRequest->denial_reason) {

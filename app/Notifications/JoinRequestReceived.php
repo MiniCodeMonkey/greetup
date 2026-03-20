@@ -53,6 +53,7 @@ class JoinRequestReceived extends Notification implements ShouldQueue
             'user_id' => $this->joinRequest->user_id,
             'join_request_id' => $this->joinRequest->id,
             'message' => "{$this->joinRequest->user->name} requested to join {$this->joinRequest->group->name}.",
+            'link' => "/groups/{$this->joinRequest->group->slug}/manage/requests",
         ];
     }
 }

@@ -53,6 +53,7 @@ class MemberRemoved extends Notification implements ShouldQueue
         $data = [
             'group_id' => $this->group->id,
             'message' => "You have been removed from {$this->group->name}.",
+            'link' => "/groups/{$this->group->slug}",
         ];
 
         if ($this->reason) {

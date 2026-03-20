@@ -40,7 +40,7 @@ class RsvpConfirmation extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject("{$status} {$this->event->name}")
             ->line("{$status} **{$this->event->name}**.")
-            ->action('View Event', url("/events/{$this->event->id}"))
+            ->action('View Event', url("/groups/{$this->event->group->slug}/events/{$this->event->slug}"))
             ->line('We look forward to seeing you there!');
     }
 
@@ -58,6 +58,7 @@ class RsvpConfirmation extends Notification implements ShouldQueue
             'message' => $this->rsvp->status->value === 'waitlisted'
                 ? "You're on the waitlist for {$this->event->name}."
                 : "You're going to {$this->event->name}.",
+            'link' => "/groups/{$this->event->group->slug}/events/{$this->event->slug}",
         ];
     }
 }

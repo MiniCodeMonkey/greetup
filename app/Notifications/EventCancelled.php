@@ -41,6 +41,8 @@ class EventCancelled extends Notification implements ShouldQueue
             $mail->line("Reason: {$this->event->cancellation_reason}");
         }
 
+        $mail->action('View Group', url("/groups/{$this->group->slug}"));
+
         return $mail;
     }
 
@@ -55,6 +57,7 @@ class EventCancelled extends Notification implements ShouldQueue
             'event_id' => $this->event->id,
             'group_id' => $this->group->id,
             'message' => "The event {$this->event->name} has been cancelled.",
+            'link' => "/groups/{$this->group->slug}",
         ];
     }
 }

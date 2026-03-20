@@ -2,21 +2,20 @@
 
 namespace App\Notifications;
 
-use App\Models\Comment;
-use App\Models\Event;
+use App\Models\Report;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class EventCommentReply extends Notification implements ShouldQueue
+class ReportReceived extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Comment $reply, public Event $event) {}
+    public function __construct(public Report $report) {}
 
     /**
      * Get the notification's delivery channels.
@@ -34,10 +33,10 @@ class EventCommentReply extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("New reply to your comment on {$this->event->name}")
-            ->line("{$this->reply->user->name} replied to your comment on **{$this->event->name}**.")
-            ->line("\"{$this->reply->body}\"")
-            ->action('View Event', url("/groups/{$this->event->group->slug}/events/{$this->event->slug}"));
+            ->subject('New content report received')
+            ->line('A new report has been submitted for review.')
+            ->line("Reason: {$this->report->reason->value}")
+            ->action('View Reports', url('/admin/reports'));
     }
 
     /**
@@ -48,11 +47,11 @@ class EventCommentReply extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'comment_id' => $this->reply->id,
-            'event_id' => $this->event->id,
-            'user_id' => $this->reply->user_id,
-            'message' => "{$this->reply->user->name} replied to your comment on {$this->event->name}.",
-            'link' => "/groups/{$this->event->group->slug}/events/{$this->event->slug}",
+            'report_id' => $this->report->id,
+            'reporter_id' => $this->report->reporter_id,
+            'reason' => $this->report->reason->value,
+            'message' => 'A new content report has been submitted for review.',
+            'link' => '/admin/reports',
         ];
     }
 }

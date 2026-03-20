@@ -39,6 +39,7 @@ class EventCommentLiked extends Notification implements ShouldQueue
             'event_id' => $this->comment->event_id,
             'user_id' => $this->liker->id,
             'message' => "{$this->liker->name} liked your comment.",
+            'link' => "/groups/{$this->comment->event->group->slug}/events/{$this->comment->event->slug}",
         ];
     }
 }

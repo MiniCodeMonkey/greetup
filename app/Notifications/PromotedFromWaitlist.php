@@ -36,7 +36,7 @@ class PromotedFromWaitlist extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject("You're in! Spot opened for {$this->event->name}")
             ->line("Great news! A spot has opened up and you've been promoted from the waitlist for **{$this->event->name}**.")
-            ->action('View Event', url("/events/{$this->event->id}"))
+            ->action('View Event', url("/groups/{$this->event->group->slug}/events/{$this->event->slug}"))
             ->line('Your RSVP status has been updated to going.');
     }
 
@@ -51,6 +51,7 @@ class PromotedFromWaitlist extends Notification implements ShouldQueue
             'event_id' => $this->event->id,
             'rsvp_id' => $this->rsvp->id,
             'message' => "You've been promoted from the waitlist for {$this->event->name}.",
+            'link' => "/groups/{$this->event->group->slug}/events/{$this->event->slug}",
         ];
     }
 }
