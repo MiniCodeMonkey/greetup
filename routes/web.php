@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -151,6 +152,10 @@ Route::middleware('auth')->group(function () {
             Route::get('groups/{group:slug}/manage/transfer', [OwnershipTransferController::class, 'edit'])->name('groups.manage.transfer');
             Route::post('groups/{group:slug}/manage/transfer', [OwnershipTransferController::class, 'update'])->name('groups.manage.transfer.update');
             Route::delete('groups/{group:slug}', [GroupController::class, 'destroy'])->name('groups.destroy');
+        });
+
+        Route::middleware('role:admin')->group(function () {
+            Route::get('admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
         });
     });
 });
