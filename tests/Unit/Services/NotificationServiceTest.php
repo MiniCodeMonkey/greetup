@@ -229,8 +229,9 @@ it('batches the fifth notification into digest instead of sending email', functi
 
     $user = User::factory()->create();
 
-    // Create 4 existing digest records within the window to simulate prior sends
-    for ($i = 0; $i < 4; $i++) {
+    // Create 5 existing digest records within the window to simulate prior sends
+    // (sentCount is 0 because Notification::fake() prevents DB notifications)
+    for ($i = 0; $i < 5; $i++) {
         PendingNotificationDigest::create([
             'user_id' => $user->id,
             'notification_type' => TestGroupNotification::class,
@@ -244,8 +245,8 @@ it('batches the fifth notification into digest instead of sending email', functi
 
     expect($result)->toBeTrue();
 
-    // The 5th should be stored as a digest, not sent via email
-    expect(PendingNotificationDigest::count())->toBe(5);
+    // The 6th should be stored as a digest, not sent via email
+    expect(PendingNotificationDigest::count())->toBe(6);
 
     // Web/database notification should still be sent directly
     NotificationFacade::assertSentTo($user, TestGroupNotification::class, function ($sentNotification, $channels) {

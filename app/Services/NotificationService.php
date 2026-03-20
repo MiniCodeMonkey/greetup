@@ -162,18 +162,25 @@ class NotificationService
      * Determine if the notification should be batched into a digest.
      * Returns true when the recipient already has DIGEST_THRESHOLD - 1 or more
      * notifications of this type within the digest window.
+     *
+     * Counts both sent database notifications and already-pending digest entries.
      */
     private function shouldBatchDigest(User $recipient, string $notificationType): bool
     {
         $windowStart = now()->subMinutes(self::DIGEST_WINDOW_MINUTES);
 
-        $recentCount = PendingNotificationDigest::query()
+        $sentCount = $recipient->notifications()
+            ->where('type', $notificationType)
+            ->where('created_at', '>=', $windowStart)
+            ->count();
+
+        $pendingCount = PendingNotificationDigest::query()
             ->where('user_id', $recipient->id)
             ->where('notification_type', $notificationType)
             ->where('created_at', '>=', $windowStart)
             ->count();
 
-        return $recentCount >= self::DIGEST_THRESHOLD - 1;
+        return ($sentCount + $pendingCount) >= self::DIGEST_THRESHOLD;
     }
 
     /**

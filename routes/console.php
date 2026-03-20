@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('groups:purge-deleted')->daily();
+Schedule::command('notifications:send-digests')->everyFiveMinutes();
