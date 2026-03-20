@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Groups\GroupController;
+use App\Http\Controllers\Groups\GroupSettingsController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\Settings\SettingsController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -76,6 +77,11 @@ Route::middleware('auth')->group(function () {
         Route::post('groups/{group:slug}/request-join', [GroupController::class, 'requestJoin'])->name('groups.request-join');
         Route::post('groups/{group:slug}/join-requests/{joinRequest}/approve', [GroupController::class, 'approveRequest'])->name('groups.join-requests.approve');
         Route::post('groups/{group:slug}/join-requests/{joinRequest}/deny', [GroupController::class, 'denyRequest'])->name('groups.join-requests.deny');
+
+        Route::middleware('groupRole:co_organizer')->group(function () {
+            Route::get('groups/{group:slug}/manage/settings', [GroupSettingsController::class, 'edit'])->name('groups.manage.settings');
+            Route::put('groups/{group:slug}/manage/settings', [GroupSettingsController::class, 'update'])->name('groups.manage.settings.update');
+        });
     });
 });
 
