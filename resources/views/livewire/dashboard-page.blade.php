@@ -20,7 +20,7 @@
                             $accentColors = ['hybrid' => 'text-green-500', 'in_person' => 'text-coral-500', 'online' => 'text-violet-500'];
                         @endphp
                         <p class="{{ $accentColors[$typeValue] ?? 'text-coral-500' }} font-medium uppercase" style="font-size: 11px; letter-spacing: 0.05em;">
-                            {{ $event->starts_at->format('D, M j · g:ia') }}
+                            {{ $event->starts_at->setTimezone($displayTimezone)->format('D, M j · g:ia') }}
                         </p>
                         <h3 class="mt-1 font-medium text-neutral-900" style="font-size: 15px;">{{ $event->name }}</h3>
                         <p class="mt-0.5 text-neutral-500" style="font-size: 13px;">{{ $event->group->name }}</p>
@@ -55,7 +55,7 @@
                                 Next: {{ $nextEvent->name }}
                             </p>
                             <p class="mt-0.5 text-neutral-400" style="font-size: 12px;">
-                                {{ $nextEvent->starts_at->format('D, M j · g:ia') }}
+                                {{ $nextEvent->starts_at->setTimezone($displayTimezone)->format('D, M j · g:ia') }}
                             </p>
                         @else
                             <p class="mt-2 text-neutral-400" style="font-size: 12px;">No upcoming events</p>
@@ -86,7 +86,7 @@
                             $accentColors = ['hybrid' => 'text-green-500', 'in_person' => 'text-coral-500', 'online' => 'text-violet-500'];
                         @endphp
                         <p class="{{ $accentColors[$typeValue] ?? 'text-coral-500' }} font-medium uppercase" style="font-size: 11px; letter-spacing: 0.05em;">
-                            {{ $event->starts_at->format('D, M j · g:ia') }}
+                            {{ $event->starts_at->setTimezone($displayTimezone)->format('D, M j · g:ia') }}
                         </p>
                         <h3 class="mt-1 font-medium text-neutral-900" style="font-size: 15px;">{{ $event->name }}</h3>
                         <p class="mt-0.5 text-neutral-500" style="font-size: 13px;">{{ $event->group->name }}</p>

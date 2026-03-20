@@ -6,6 +6,7 @@ use App\Livewire\ExplorePage;
 use App\Models\Event;
 use App\Models\Group;
 use App\Models\Rsvp;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -275,4 +276,35 @@ it('filters events by topic', function (): void {
         ->set('topic', 'Technology')
         ->assertSee('Tech Meetup')
         ->assertDontSee('Sports Gathering');
+});
+
+it('displays event times in user timezone for authenticated users', function (): void {
+    $user = User::factory()->create(['timezone' => 'America/New_York']);
+    $group = createExploreGroup();
+    // Store event at 18:00 UTC — should display as 2:00pm ET
+    createExploreEvent($group, [
+        'name' => 'Timezone Event',
+        'starts_at' => '2026-06-15 18:00:00',
+        'timezone' => 'Europe/Berlin',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ExplorePage::class)
+        ->assertSee('2:00pm');
+});
+
+it('displays event times in default timezone for guests', function (): void {
+    Setting::create(['key' => 'default_timezone', 'value' => 'Europe/Berlin']);
+    Setting::clearCache();
+
+    $group = createExploreGroup();
+    // Store event at 18:00 UTC — should display as 8:00pm CEST in Berlin
+    createExploreEvent($group, [
+        'name' => 'Guest Timezone Event',
+        'starts_at' => '2026-06-15 18:00:00',
+        'timezone' => 'America/New_York',
+    ]);
+
+    Livewire::test(ExplorePage::class)
+        ->assertSee('8:00pm');
 });

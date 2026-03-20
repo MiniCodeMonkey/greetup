@@ -1,8 +1,8 @@
-@props(['event', 'show_rsvp' => true])
+@props(['event', 'show_rsvp' => true, 'displayTimezone' => null])
 
 @php
     $eventType = $event->event_type ?? 'in_person';
-    $startsAt = $event->starts_at;
+    $startsAt = $displayTimezone ? $event->starts_at->setTimezone($displayTimezone) : $event->starts_at;
     $rsvps = $event->rsvps ?? collect();
     $goingCount = $rsvps->count();
     $capacity = $event->capacity ?? null;

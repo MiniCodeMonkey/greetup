@@ -112,10 +112,14 @@ class ExplorePage extends Component
 
         $siteName = Setting::get('site_name', config('app.name', 'Greetup'));
 
+        $user = Auth::user();
+        $displayTimezone = $user?->timezone ?: Setting::get('default_timezone', 'UTC');
+
         return view('livewire.explore-page', [
             'events' => $events,
             'onlineEvents' => $onlineEvents,
             'topics' => $topics,
+            'displayTimezone' => $displayTimezone,
         ])->layoutData([
             'title' => "Explore Events — {$siteName}",
             'description' => 'Discover local meetups, events, and community groups near you.',

@@ -1,4 +1,4 @@
-@props(['event'])
+@props(['event', 'displayTimezone' => null])
 
 @php
     $eventTypeRaw = $event->event_type ?? 'in_person';
@@ -43,7 +43,7 @@
     }
 
     $eventUrl = $group ? route('events.show', ['group' => $group->slug, 'event' => $event->slug]) : '#';
-    $startsAt = $event->starts_at;
+    $startsAt = $displayTimezone ? $event->starts_at->setTimezone($displayTimezone) : $event->starts_at;
 @endphp
 
 <a href="{{ $eventUrl }}" {{ $attributes->merge(['class' => 'block rounded-xl overflow-hidden']) }} style="border: 0.5px solid var(--color-neutral-200);">
@@ -68,7 +68,7 @@
     <div class="p-4">
         {{-- Date --}}
         <p class="{{ $accentText }} font-medium uppercase" style="font-size: 11px; letter-spacing: 0.05em;">
-            {{ $startsAt->format('D, M j') }}
+            {{ $startsAt->format('D, M j · g:ia') }}
         </p>
 
         {{-- Title --}}

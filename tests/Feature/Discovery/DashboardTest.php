@@ -251,6 +251,48 @@ it('shows empty state for notifications when none unread', function (): void {
         ->assertSee('No unread notifications');
 });
 
+it('displays event times in user timezone on dashboard', function (): void {
+    $user = User::factory()->create(['timezone' => 'America/Los_Angeles']);
+    $group = createDashboardGroup();
+    $group->members()->attach($user);
+
+    // Store event at 18:00 UTC — should display as 11:00am PDT in LA
+    $event = createDashboardEvent($group, [
+        'name' => 'TZ Dashboard Event',
+        'starts_at' => '2026-06-15 18:00:00',
+        'timezone' => 'Europe/Berlin',
+    ]);
+
+    Rsvp::factory()->create([
+        'user_id' => $user->id,
+        'event_id' => $event->id,
+        'status' => RsvpStatus::Going,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSee('11:00am');
+});
+
+it('displays suggested event times in user timezone', function (): void {
+    $user = User::factory()->create(['timezone' => 'Asia/Tokyo']);
+    $group = createDashboardGroup();
+    $group->members()->attach($user);
+
+    // Store event at 10:00 UTC — should display as 7:00pm JST
+    createDashboardEvent($group, [
+        'name' => 'Tokyo Time Event',
+        'starts_at' => '2026-06-15 10:00:00',
+        'timezone' => 'UTC',
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSee('7:00pm');
+});
+
 it('shows unread notifications', function (): void {
     $user = User::factory()->create();
 

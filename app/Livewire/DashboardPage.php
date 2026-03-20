@@ -20,6 +20,7 @@ class DashboardPage extends Component
     {
         $user = Auth::user();
         $siteName = Setting::get('site_name', config('app.name', 'Greetup'));
+        $displayTimezone = $user->timezone ?: Setting::get('default_timezone', 'UTC');
 
         $upcomingEvents = $this->getUpcomingEvents($user);
         $userGroups = $this->getUserGroups($user);
@@ -31,6 +32,7 @@ class DashboardPage extends Component
             'userGroups' => $userGroups,
             'suggestedEvents' => $suggestedEvents,
             'notifications' => $notifications,
+            'displayTimezone' => $displayTimezone,
         ])->layoutData([
             'title' => "Dashboard — {$siteName}",
             'description' => 'Your personalized dashboard with upcoming events, groups, and recommendations.',

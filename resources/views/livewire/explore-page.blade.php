@@ -113,7 +113,7 @@
                     </div>
                     <div class="p-4">
                         <p class="{{ $accentColors[$typeValue] ?? 'text-coral-500' }} font-medium uppercase" style="font-size: 11px; letter-spacing: 0.05em;">
-                            {{ $event->starts_at->format('D, M j') }}
+                            {{ $event->starts_at->setTimezone($displayTimezone)->format('D, M j · g:ia') }}
                         </p>
                         <h3 class="mt-1 font-medium text-neutral-900" style="font-size: 15px;">{{ $event->name }}</h3>
                         <p class="mt-0.5 text-neutral-500" style="font-size: 13px;">{{ $event->group->name }}</p>
@@ -150,7 +150,7 @@
                     </div>
                     <div class="p-4">
                         <p class="{{ $accentColors[$typeValue] ?? 'text-coral-500' }} font-medium uppercase" style="font-size: 11px; letter-spacing: 0.05em;">
-                            {{ $event->starts_at->format('D, M j') }}
+                            {{ $event->starts_at->setTimezone($displayTimezone)->format('D, M j · g:ia') }}
                         </p>
                         <h3 class="mt-1 font-medium text-neutral-900" style="font-size: 15px;">{{ $event->name }}</h3>
                         <p class="mt-0.5 text-neutral-500" style="font-size: 13px;">{{ $event->group->name }}</p>
@@ -198,7 +198,7 @@
                         </div>
                         <div class="p-4">
                             <p class="font-medium uppercase text-violet-500" style="font-size: 11px; letter-spacing: 0.05em;">
-                                {{ $event->starts_at->format('D, M j') }}
+                                {{ $event->starts_at->setTimezone($displayTimezone)->format('D, M j · g:ia') }}
                             </p>
                             <h3 class="mt-1 font-medium text-neutral-900" style="font-size: 15px;">{{ $event->name }}</h3>
                             <p class="mt-0.5 text-neutral-500" style="font-size: 13px;">{{ $event->group->name }}</p>
