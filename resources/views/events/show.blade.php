@@ -146,7 +146,13 @@
                     @endif
 
                     @if ($tab === 'comments')
-                        <p class="text-sm text-neutral-500" data-testid="comments-tab">No comments yet.</p>
+                        <div data-testid="comments-tab">
+                            @if ($event->is_comments_enabled)
+                                <livewire:comment-thread :event="$event" />
+                            @else
+                                <p class="text-sm text-neutral-500">Comments are disabled for this event.</p>
+                            @endif
+                        </div>
                     @endif
 
                     @if ($tab === 'chat')
