@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Events\DirectMessageSent;
+use App\Models\Block;
 use App\Models\Conversation;
 use App\Models\ConversationParticipant;
 use App\Models\DirectMessage;
@@ -43,6 +44,20 @@ class ConversationView extends Component
             'body' => ['required', 'string', 'max:5000'],
         ]);
 
+        $otherUserId = ConversationParticipant::where('conversation_id', $this->conversation->id)
+            ->where('user_id', '!=', Auth::id())
+            ->value('user_id');
+
+        $isBlocked = Block::where(function ($query) use ($otherUserId) {
+            $query->where('blocker_id', Auth::id())->where('blocked_id', $otherUserId);
+        })->orWhere(function ($query) use ($otherUserId) {
+            $query->where('blocker_id', $otherUserId)->where('blocked_id', Auth::id());
+        })->exists();
+
+        if ($isBlocked) {
+            abort(403, 'You cannot message this user.');
+        }
+
         $key = 'dm.'.Auth::id();
 
         if (RateLimiter::tooManyAttempts($key, 20)) {
@@ -65,7 +80,13 @@ class ConversationView extends Component
             ->where('user_id', '!=', Auth::id())
             ->first();
 
-        if ($otherParticipant && ! $otherParticipant->is_muted) {
+        $notificationBlocked = Block::where(function ($query) use ($otherParticipant) {
+            $query->where('blocker_id', Auth::id())->where('blocked_id', $otherParticipant?->user_id);
+        })->orWhere(function ($query) use ($otherParticipant) {
+            $query->where('blocker_id', $otherParticipant?->user_id)->where('blocked_id', Auth::id());
+        })->exists();
+
+        if ($otherParticipant && ! $otherParticipant->is_muted && ! $notificationBlocked) {
             $otherParticipant->user->notify(new NewDirectMessage($message));
         }
 

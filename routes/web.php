@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\BlockController;
 use App\Http\Controllers\Discussions\DiscussionController;
 use App\Http\Controllers\Events\AttendeeManagementController;
 use App\Http\Controllers\Events\EventController;
@@ -79,6 +80,9 @@ Route::middleware('auth')->group(function () {
         Route::put('settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
         Route::get('settings/data-export', [SettingsController::class, 'exportData'])->name('settings.data-export');
         Route::delete('settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.account.delete');
+
+        Route::post('members/{user}/block', [BlockController::class, 'store'])->name('members.block');
+        Route::delete('members/{user}/block', [BlockController::class, 'destroy'])->name('members.unblock');
 
         Route::get('messages', [ConversationController::class, 'index'])->name('messages.index');
         Route::post('messages', [ConversationController::class, 'store'])->name('messages.store')->middleware('throttle:dm');

@@ -16,9 +16,20 @@ class ConversationController extends Controller
     {
         $user = request()->user();
 
+        $blockedUserIds = Block::where('blocker_id', $user->id)
+            ->pluck('blocked_id')
+            ->merge(
+                Block::where('blocked_id', $user->id)->pluck('blocker_id')
+            );
+
         $conversations = Conversation::whereHas('participants', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
+            ->when($blockedUserIds->isNotEmpty(), function ($query) use ($blockedUserIds) {
+                $query->whereDoesntHave('participants', function ($q) use ($blockedUserIds) {
+                    $q->whereIn('user_id', $blockedUserIds);
+                });
+            })
             ->with(['participants.user', 'messages' => function ($query) {
                 $query->latest()->limit(1);
             }])
