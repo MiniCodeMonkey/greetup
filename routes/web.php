@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminGroupController;
+use App\Http\Controllers\Admin\AdminInterestController;
 use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -176,6 +177,14 @@ Route::middleware('auth')->group(function () {
             Route::post('admin/reports/{report}/dismiss', [AdminReportController::class, 'dismiss'])->name('admin.reports.dismiss');
             Route::post('admin/reports/{report}/suspend-user', [AdminReportController::class, 'suspendUser'])->name('admin.reports.suspend-user');
             Route::post('admin/reports/{report}/delete-content', [AdminReportController::class, 'deleteContent'])->name('admin.reports.delete-content');
+
+            Route::get('admin/interests', [AdminInterestController::class, 'index'])->name('admin.interests.index');
+            Route::get('admin/interests/create', [AdminInterestController::class, 'create'])->name('admin.interests.create');
+            Route::post('admin/interests', [AdminInterestController::class, 'store'])->name('admin.interests.store');
+            Route::get('admin/interests/{interest}/edit', [AdminInterestController::class, 'edit'])->name('admin.interests.edit');
+            Route::put('admin/interests/{interest}', [AdminInterestController::class, 'update'])->name('admin.interests.update');
+            Route::delete('admin/interests/{interest}', [AdminInterestController::class, 'destroy'])->name('admin.interests.destroy');
+            Route::post('admin/interests/{interest}/merge', [AdminInterestController::class, 'merge'])->name('admin.interests.merge');
         });
     });
 });
