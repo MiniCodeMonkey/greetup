@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Events\AttendeeManagementController;
 use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Groups\GroupAnalyticsController;
 use App\Http\Controllers\Groups\GroupController;
@@ -90,7 +91,11 @@ Route::middleware('auth')->group(function () {
             Route::get('groups/{group:slug}/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
             Route::put('groups/{group:slug}/events/{event}', [EventController::class, 'update'])->name('events.update');
             Route::post('groups/{group:slug}/events/{event}/cancel', [EventController::class, 'cancel'])->name('events.cancel');
+
         });
+
+        Route::get('groups/{group:slug}/events/{event:slug}/attendees', [AttendeeManagementController::class, 'index'])->name('events.attendees');
+        Route::get('groups/{group:slug}/events/{event:slug}/attendees/export', [AttendeeManagementController::class, 'export'])->name('events.attendees.export');
 
         Route::middleware('groupRole:assistant_organizer')->group(function () {
             Route::get('groups/{group:slug}/manage/members', [GroupMemberManagementController::class, 'index'])->name('groups.manage.members');
