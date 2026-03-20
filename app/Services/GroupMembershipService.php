@@ -7,6 +7,7 @@ use App\Enums\JoinRequestStatus;
 use App\Models\Group;
 use App\Models\GroupJoinRequest;
 use App\Models\User;
+use App\Notifications\WelcomeToGroup;
 use InvalidArgumentException;
 
 class GroupMembershipService
@@ -16,6 +17,10 @@ class GroupMembershipService
      */
     public function joinGroup(Group $group, User $user): void
     {
+        if ($this->isBanned($group, $user)) {
+            throw new InvalidArgumentException('User is banned from this group.');
+        }
+
         if ($this->isMember($group, $user)) {
             throw new InvalidArgumentException('User is already a member of this group.');
         }
@@ -32,6 +37,8 @@ class GroupMembershipService
             'role' => GroupRole::Member->value,
             'joined_at' => now(),
         ]);
+
+        $user->notify(new WelcomeToGroup($group));
     }
 
     /**
@@ -144,5 +151,16 @@ class GroupMembershipService
     public function isMember(Group $group, User $user): bool
     {
         return $group->members()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * Check if a user is banned from a group.
+     */
+    public function isBanned(Group $group, User $user): bool
+    {
+        return $group->members()
+            ->where('user_id', $user->id)
+            ->where('is_banned', true)
+            ->exists();
     }
 }

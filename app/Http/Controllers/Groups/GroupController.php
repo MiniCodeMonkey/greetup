@@ -7,9 +7,11 @@ use App\Enums\GroupVisibility;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Groups\CreateGroupRequest;
 use App\Models\Group;
+use App\Services\GroupMembershipService;
 use App\Services\MarkdownService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -70,6 +72,19 @@ class GroupController extends Controller
 
         return redirect()->route('groups.show', $group)
             ->with('status', 'Group created successfully!');
+    }
+
+    /**
+     * Join an open group.
+     */
+    public function join(Request $request, Group $group, GroupMembershipService $membershipService): RedirectResponse
+    {
+        Gate::authorize('join', $group);
+
+        $membershipService->joinGroup($group, $request->user());
+
+        return redirect()->route('groups.show', $group)
+            ->with('status', "You've joined {$group->name}!");
     }
 
     /**
