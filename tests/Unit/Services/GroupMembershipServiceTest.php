@@ -7,6 +7,7 @@ use App\Models\GroupJoinRequest;
 use App\Models\User;
 use App\Services\GroupMembershipService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
@@ -58,7 +59,12 @@ it('throws when group has reached member limit', function (): void {
 // --- Request to Join ---
 
 it('creates a join request for approval-required group', function (): void {
-    $group = Group::factory()->create(['requires_approval' => true]);
+    Notification::fake();
+
+    $organizer = User::factory()->create();
+    $group = Group::factory()->create(['requires_approval' => true, 'organizer_id' => $organizer->id]);
+    $group->members()->attach($organizer->id, ['role' => GroupRole::Organizer->value, 'joined_at' => now()]);
+
     $user = User::factory()->create();
 
     $request = $this->service->requestToJoin($group, $user);
@@ -75,17 +81,40 @@ it('throws when requesting to join a group that does not require approval', func
     $this->service->requestToJoin($group, $user);
 })->throws(InvalidArgumentException::class, 'This group does not require approval.');
 
-it('throws when user already has a pending join request', function (): void {
-    $group = Group::factory()->create(['requires_approval' => true]);
+it('updates existing request when re-requesting to join', function (): void {
+    Notification::fake();
+
+    $organizer = User::factory()->create();
+    $group = Group::factory()->create(['requires_approval' => true, 'organizer_id' => $organizer->id]);
+    $group->members()->attach($organizer->id, ['role' => GroupRole::Organizer->value, 'joined_at' => now()]);
+
     $user = User::factory()->create();
 
-    $this->service->requestToJoin($group, $user);
-    $this->service->requestToJoin($group, $user);
-})->throws(InvalidArgumentException::class, 'User already has a pending join request.');
+    $firstRequest = $this->service->requestToJoin($group, $user);
+
+    // Simulate denial
+    $firstRequest->update([
+        'status' => JoinRequestStatus::Denied,
+        'reviewed_by' => $organizer->id,
+        'reviewed_at' => now(),
+        'denial_reason' => 'Not enough info.',
+    ]);
+
+    $secondRequest = $this->service->requestToJoin($group, $user);
+
+    expect($secondRequest->id)->toBe($firstRequest->id)
+        ->and($secondRequest->status)->toBe(JoinRequestStatus::Pending)
+        ->and($secondRequest->reviewed_by)->toBeNull()
+        ->and($secondRequest->denial_reason)->toBeNull();
+
+    expect(GroupJoinRequest::where('group_id', $group->id)->where('user_id', $user->id)->count())->toBe(1);
+});
 
 // --- Approve Request ---
 
 it('approves a pending join request and adds member', function (): void {
+    Notification::fake();
+
     $group = Group::factory()->create(['requires_approval' => true]);
     $user = User::factory()->create();
     $reviewer = User::factory()->create();
@@ -122,6 +151,8 @@ it('throws when approving a non-pending request', function (): void {
 // --- Deny Request ---
 
 it('denies a pending join request with reason', function (): void {
+    Notification::fake();
+
     $group = Group::factory()->create(['requires_approval' => true]);
     $user = User::factory()->create();
     $reviewer = User::factory()->create();

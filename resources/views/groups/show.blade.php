@@ -74,22 +74,33 @@
                             @endif
                         </form>
                     @else
-                        @if ($group->requires_approval)
-                            <a
-                                href="{{ route('groups.show', $group) }}"
+                        @if ($pendingRequest)
+                            <span
+                                class="inline-flex items-center rounded-md bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-500"
+                                data-testid="request-pending"
+                            >
+                                Request Pending
+                            </span>
+                        @elseif ($group->requires_approval)
+                            <button
+                                type="button"
                                 class="inline-flex items-center rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                                 data-testid="request-join-button"
+                                onclick="document.getElementById('join-request-form').classList.toggle('hidden')"
                             >
                                 Request to Join
-                            </a>
+                            </button>
                         @else
-                            <a
-                                href="{{ route('groups.show', $group) }}"
-                                class="inline-flex items-center rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-                                data-testid="join-button"
-                            >
-                                Join Group
-                            </a>
+                            <form method="POST" action="{{ route('groups.join', $group) }}">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                    data-testid="join-button"
+                                >
+                                    Join Group
+                                </button>
+                            </form>
                         @endif
                     @endauth
                 @endauth
@@ -105,6 +116,51 @@
                 @endguest
             </div>
         </div>
+
+        {{-- Join request form with membership questions --}}
+        @auth
+            @if (! $isMember && ! $pendingRequest && $group->requires_approval)
+                <div id="join-request-form" class="mt-6 hidden rounded-lg bg-neutral-50 p-6" data-testid="join-request-form">
+                    <h2 class="text-base font-medium text-neutral-900">Request to Join {{ $group->name }}</h2>
+                    <form method="POST" action="{{ route('groups.request-join', $group) }}" class="mt-4">
+                        @csrf
+                        @if ($membershipQuestions->isNotEmpty())
+                            <div class="space-y-4">
+                                @foreach ($membershipQuestions as $question)
+                                    <div>
+                                        <label for="answer-{{ $question->id }}" class="block text-sm font-medium text-neutral-700">
+                                            {{ $question->question }}
+                                            @if ($question->is_required)
+                                                <span class="text-red-500">*</span>
+                                            @endif
+                                        </label>
+                                        <textarea
+                                            id="answer-{{ $question->id }}"
+                                            name="answers[{{ $question->id }}]"
+                                            rows="3"
+                                            class="mt-1 block w-full rounded-md border-neutral-200 text-sm shadow-sm focus:border-green-500 focus:ring-green-500"
+                                            {{ $question->is_required ? 'required' : '' }}
+                                        >{{ old("answers.{$question->id}") }}</textarea>
+                                        @error("answers.{$question->id}")
+                                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                        <div class="mt-4">
+                            <button
+                                type="submit"
+                                class="inline-flex items-center rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                data-testid="submit-join-request"
+                            >
+                                Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+        @endauth
 
         @if ($isPrivate && ! $isMember)
             {{-- Private group: limited info --}}

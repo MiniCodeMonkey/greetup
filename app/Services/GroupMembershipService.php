@@ -6,7 +6,11 @@ use App\Enums\GroupRole;
 use App\Enums\JoinRequestStatus;
 use App\Models\Group;
 use App\Models\GroupJoinRequest;
+use App\Models\GroupMembershipAnswer;
 use App\Models\User;
+use App\Notifications\JoinRequestApproved;
+use App\Notifications\JoinRequestDenied;
+use App\Notifications\JoinRequestReceived;
 use App\Notifications\WelcomeToGroup;
 use InvalidArgumentException;
 
@@ -43,8 +47,10 @@ class GroupMembershipService
 
     /**
      * Submit a join request for an approval-required group.
+     *
+     * @param  array<int, string>  $answers  Keyed by question_id
      */
-    public function requestToJoin(Group $group, User $user): GroupJoinRequest
+    public function requestToJoin(Group $group, User $user, array $answers = []): GroupJoinRequest
     {
         if ($this->isMember($group, $user)) {
             throw new InvalidArgumentException('User is already a member of this group.');
@@ -54,21 +60,55 @@ class GroupMembershipService
             throw new InvalidArgumentException('This group does not require approval. Use joinGroup() instead.');
         }
 
-        $existingRequest = GroupJoinRequest::query()
+        $joinRequest = GroupJoinRequest::query()
             ->where('group_id', $group->id)
             ->where('user_id', $user->id)
-            ->where('status', JoinRequestStatus::Pending)
             ->first();
 
-        if ($existingRequest !== null) {
-            throw new InvalidArgumentException('User already has a pending join request.');
+        if ($joinRequest !== null) {
+            $joinRequest->update([
+                'status' => JoinRequestStatus::Pending,
+                'reviewed_by' => null,
+                'reviewed_at' => null,
+                'denial_reason' => null,
+            ]);
+        } else {
+            $joinRequest = GroupJoinRequest::create([
+                'group_id' => $group->id,
+                'user_id' => $user->id,
+                'status' => JoinRequestStatus::Pending,
+            ]);
         }
 
-        return GroupJoinRequest::create([
-            'group_id' => $group->id,
-            'user_id' => $user->id,
-            'status' => JoinRequestStatus::Pending,
-        ]);
+        foreach ($answers as $questionId => $answer) {
+            GroupMembershipAnswer::query()->updateOrCreate(
+                ['question_id' => $questionId, 'user_id' => $user->id],
+                ['answer' => $answer],
+            );
+        }
+
+        $this->notifyLeadership($group, new JoinRequestReceived($joinRequest));
+
+        return $joinRequest;
+    }
+
+    /**
+     * Notify organizer and assistant+ members of the group.
+     */
+    private function notifyLeadership(Group $group, object $notification): void
+    {
+        $leaders = $group->members()
+            ->where('group_members.is_banned', false)
+            ->whereIn('group_members.role', [
+                GroupRole::Organizer->value,
+                GroupRole::CoOrganizer->value,
+                GroupRole::AssistantOrganizer->value,
+            ])
+            ->get();
+
+        foreach ($leaders as $leader) {
+            $leader->notify($notification);
+        }
     }
 
     /**
@@ -96,6 +136,12 @@ class GroupMembershipService
             'role' => GroupRole::Member->value,
             'joined_at' => now(),
         ]);
+
+        $request->user->notify(new JoinRequestApproved($request));
+
+        if ($group->welcome_message) {
+            $request->user->notify(new WelcomeToGroup($group));
+        }
     }
 
     /**
@@ -113,6 +159,8 @@ class GroupMembershipService
             'reviewed_at' => now(),
             'denial_reason' => $reason,
         ]);
+
+        $request->user->notify(new JoinRequestDenied($request));
     }
 
     /**

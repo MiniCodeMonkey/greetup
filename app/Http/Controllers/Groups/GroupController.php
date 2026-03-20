@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Groups;
 
 use App\Enums\GroupRole;
 use App\Enums\GroupVisibility;
+use App\Enums\JoinRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Groups\CreateGroupRequest;
+use App\Http\Requests\Groups\HandleJoinRequestRequest;
+use App\Http\Requests\Groups\RequestToJoinGroupRequest;
 use App\Models\Group;
+use App\Models\GroupJoinRequest;
 use App\Services\GroupMembershipService;
 use App\Services\MarkdownService;
 use Illuminate\Http\RedirectResponse;
@@ -88,6 +92,41 @@ class GroupController extends Controller
     }
 
     /**
+     * Request to join an approval-required group.
+     */
+    public function requestJoin(RequestToJoinGroupRequest $request, Group $group, GroupMembershipService $membershipService): RedirectResponse
+    {
+        $answers = $request->validated()['answers'] ?? [];
+
+        $membershipService->requestToJoin($group, $request->user(), $answers);
+
+        return redirect()->route('groups.show', $group)
+            ->with('status', 'Your request to join has been submitted!');
+    }
+
+    /**
+     * Approve a pending join request.
+     */
+    public function approveRequest(HandleJoinRequestRequest $request, Group $group, GroupJoinRequest $joinRequest, GroupMembershipService $membershipService): RedirectResponse
+    {
+        $membershipService->approveRequest($joinRequest, $request->user());
+
+        return redirect()->route('groups.show', $group)
+            ->with('status', 'Join request approved.');
+    }
+
+    /**
+     * Deny a pending join request.
+     */
+    public function denyRequest(HandleJoinRequestRequest $request, Group $group, GroupJoinRequest $joinRequest, GroupMembershipService $membershipService): RedirectResponse
+    {
+        $membershipService->denyRequest($joinRequest, $request->user(), $request->validated()['reason'] ?? null);
+
+        return redirect()->route('groups.show', $group)
+            ->with('status', 'Join request denied.');
+    }
+
+    /**
      * Display the group page.
      */
     public function show(Request $request, Group $group): View
@@ -95,10 +134,26 @@ class GroupController extends Controller
         $user = $request->user();
         $isMember = false;
         $membership = null;
+        $pendingRequest = null;
+        $membershipQuestions = collect();
 
         if ($user) {
             $membership = $group->members()->where('user_id', $user->id)->first()?->pivot;
             $isMember = $membership !== null && ! $membership->is_banned;
+
+            if (! $isMember && $group->requires_approval) {
+                $pendingRequest = GroupJoinRequest::query()
+                    ->where('group_id', $group->id)
+                    ->where('user_id', $user->id)
+                    ->where('status', JoinRequestStatus::Pending)
+                    ->first();
+
+                if (! $pendingRequest) {
+                    $membershipQuestions = $group->membershipQuestions()
+                        ->orderBy('sort_order')
+                        ->get();
+                }
+            }
         }
 
         $isPrivate = $group->visibility === GroupVisibility::Private;
@@ -188,6 +243,8 @@ class GroupController extends Controller
             'group' => $group,
             'isMember' => $isMember,
             'membership' => $membership,
+            'pendingRequest' => $pendingRequest,
+            'membershipQuestions' => $membershipQuestions,
             'isPrivate' => $isPrivate,
             'topics' => $topics,
             'memberAvatars' => $memberAvatars,
