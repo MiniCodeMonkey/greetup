@@ -104,6 +104,7 @@
                         ['label' => 'Attendees', 'href' => route('events.show', ['group' => $group->slug, 'event' => $event->slug, 'tab' => 'attendees']), 'active' => $tab === 'attendees'],
                         ['label' => 'Comments', 'href' => route('events.show', ['group' => $group->slug, 'event' => $event->slug, 'tab' => 'comments']), 'active' => $tab === 'comments'],
                         ['label' => 'Chat', 'href' => route('events.show', ['group' => $group->slug, 'event' => $event->slug, 'tab' => 'chat']), 'active' => $tab === 'chat'],
+                        ['label' => 'Feedback', 'href' => route('events.show', ['group' => $group->slug, 'event' => $event->slug, 'tab' => 'feedback']), 'active' => $tab === 'feedback'],
                     ]" />
                 </div>
 
@@ -162,6 +163,12 @@
                             @else
                                 <p class="text-sm text-neutral-500">Chat is disabled for this event.</p>
                             @endif
+                        </div>
+                    @endif
+
+                    @if ($tab === 'feedback')
+                        <div data-testid="feedback-tab">
+                            <livewire:event-feedback :event="$event" />
                         </div>
                     @endif
                 </div>
