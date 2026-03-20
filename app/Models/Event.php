@@ -215,15 +215,27 @@ class Event extends Model implements HasMedia
      */
     public function scopeNearby(Builder $query, float $lat, float $lng, float $radiusKm = 50): Builder
     {
-        $haversine = '(6371 * acos(cos(radians(?)) * cos(radians(venue_latitude))
-            * cos(radians(venue_longitude) - radians(?)) + sin(radians(?))
-            * sin(radians(venue_latitude))))';
+        $effectiveLat = 'COALESCE(events.venue_latitude, groups.latitude)';
+        $effectiveLng = 'COALESCE(events.venue_longitude, groups.longitude)';
+
+        $haversine = "(6371 * acos(cos(radians(?)) * cos(radians($effectiveLat))
+            * cos(radians($effectiveLng) - radians(?)) + sin(radians(?))
+            * sin(radians($effectiveLat))))";
 
         return $query
-            ->whereNotNull('venue_latitude')
-            ->whereNotNull('venue_longitude')
+            ->join('groups', 'events.group_id', '=', 'groups.id')
+            ->where(function (Builder $q): void {
+                $q->where(function (Builder $sub): void {
+                    $sub->whereNotNull('events.venue_latitude')
+                        ->whereNotNull('events.venue_longitude');
+                })->orWhere(function (Builder $sub): void {
+                    $sub->whereNotNull('groups.latitude')
+                        ->whereNotNull('groups.longitude');
+                });
+            })
             ->whereRaw("$haversine < ?", [$lat, $lng, $lat, $radiusKm])
-            ->orderByRaw("$haversine", [$lat, $lng, $lat]);
+            ->orderByRaw("$haversine", [$lat, $lng, $lat])
+            ->select('events.*');
     }
 
     /**

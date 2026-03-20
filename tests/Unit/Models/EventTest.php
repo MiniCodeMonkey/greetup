@@ -257,9 +257,14 @@ it('scopes nearby events using haversine formula', function (): void {
         'venue_longitude' => -74.0060000,
     ]);
 
-    // Event with no venue location
+    // Event with no venue location and no group location
+    $noLocationGroup = Group::factory()->create([
+        'latitude' => null,
+        'longitude' => null,
+    ]);
     Event::factory()->create([
         'name' => 'No Location Event',
+        'group_id' => $noLocationGroup->id,
         'venue_latitude' => null,
         'venue_longitude' => null,
     ]);
