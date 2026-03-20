@@ -223,6 +223,138 @@ it('includes JSON-LD structured data', function (): void {
         ->assertSee('EventScheduled', false);
 });
 
+it('includes JSON-LD with EventCancelled status for cancelled events', function (): void {
+    $group = Group::factory()->create(['name' => 'Test Group']);
+    $event = Event::factory()->cancelled()->create([
+        'group_id' => $group->id,
+        'name' => 'Cancelled Event',
+    ]);
+
+    $response = $this->get(route('events.show', [$group, $event]));
+
+    $response->assertStatus(200)
+        ->assertSee('EventCancelled', false);
+});
+
+it('includes JSON-LD with OnlineEventAttendanceMode and VirtualLocation for online events', function (): void {
+    $group = Group::factory()->create(['name' => 'Online Group']);
+    $event = Event::factory()->published()->online()->create([
+        'group_id' => $group->id,
+        'name' => 'Online Meetup',
+        'online_link' => 'https://meet.example.com/room',
+    ]);
+
+    $response = $this->get(route('events.show', [$group, $event]));
+
+    $response->assertStatus(200)
+        ->assertSee('OnlineEventAttendanceMode', false)
+        ->assertSee('VirtualLocation', false)
+        ->assertSee('https://meet.example.com/room', false);
+});
+
+it('includes JSON-LD with MixedEventAttendanceMode for hybrid events', function (): void {
+    $group = Group::factory()->create(['name' => 'Hybrid Group']);
+    $event = Event::factory()->published()->hybrid()->create([
+        'group_id' => $group->id,
+        'name' => 'Hybrid Meetup',
+        'venue_name' => 'City Hall',
+        'venue_address' => '1 Center St',
+        'online_link' => 'https://zoom.example.com/hybrid',
+    ]);
+
+    $response = $this->get(route('events.show', [$group, $event]));
+
+    $response->assertStatus(200)
+        ->assertSee('MixedEventAttendanceMode', false)
+        ->assertSee('Place', false)
+        ->assertSee('VirtualLocation', false);
+});
+
+it('includes JSON-LD with SoldOut availability when event is full', function (): void {
+    $group = Group::factory()->create();
+    $event = Event::factory()->published()->withRsvpLimit(2)->create([
+        'group_id' => $group->id,
+        'name' => 'Full Event',
+    ]);
+    Rsvp::factory()->going()->count(2)->create(['event_id' => $event->id]);
+
+    $response = $this->get(route('events.show', [$group, $event]));
+
+    $response->assertStatus(200)
+        ->assertSee('SoldOut', false);
+});
+
+it('includes JSON-LD with PreOrder availability when RSVP is not yet open', function (): void {
+    $group = Group::factory()->create();
+    $event = Event::factory()->published()->create([
+        'group_id' => $group->id,
+        'name' => 'Future RSVP Event',
+        'rsvp_opens_at' => now()->addWeek(),
+    ]);
+
+    $response = $this->get(route('events.show', [$group, $event]));
+
+    $response->assertStatus(200)
+        ->assertSee('PreOrder', false);
+});
+
+it('includes JSON-LD with InStock availability when spots are available', function (): void {
+    $group = Group::factory()->create();
+    $event = Event::factory()->published()->withRsvpLimit(50)->create([
+        'group_id' => $group->id,
+        'name' => 'Open Event',
+    ]);
+    Rsvp::factory()->going()->count(5)->create(['event_id' => $event->id]);
+
+    $response = $this->get(route('events.show', [$group, $event]));
+
+    $response->assertStatus(200)
+        ->assertSee('InStock', false);
+});
+
+it('includes JSON-LD with organizer information', function (): void {
+    $group = Group::factory()->create(['name' => 'Laravel Copenhagen']);
+    $event = Event::factory()->published()->create([
+        'group_id' => $group->id,
+        'name' => 'Organizer Test',
+    ]);
+
+    $response = $this->get(route('events.show', [$group, $event]));
+
+    $response->assertStatus(200)
+        ->assertSee('"@type":"Organization"', false)
+        ->assertSee('Laravel Copenhagen', false);
+});
+
+it('includes JSON-LD with endDate when event has an end time', function (): void {
+    $group = Group::factory()->create();
+    $event = Event::factory()->published()->create([
+        'group_id' => $group->id,
+        'starts_at' => '2026-04-01 18:00:00',
+        'ends_at' => '2026-04-01 21:00:00',
+    ]);
+
+    $response = $this->get(route('events.show', [$group, $event]));
+
+    $response->assertStatus(200)
+        ->assertSee('endDate', false)
+        ->assertSee('2026-04-01', false);
+});
+
+it('includes JSON-LD with free offer details', function (): void {
+    $group = Group::factory()->create();
+    $event = Event::factory()->published()->create([
+        'group_id' => $group->id,
+    ]);
+
+    $response = $this->get(route('events.show', [$group, $event]));
+
+    $response->assertStatus(200)
+        ->assertSee('"@type":"Offer"', false)
+        ->assertSee('"price":"0"', false)
+        ->assertSee('"priceCurrency":"USD"', false);
+});
+
 it('generates a downloadable .ics file', function (): void {
     $group = Group::factory()->create();
     $event = Event::factory()->published()->create([

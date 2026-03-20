@@ -436,7 +436,9 @@ class EventController extends Controller
         };
 
         $availability = 'https://schema.org/InStock';
-        if ($event->rsvp_limit && $goingCount >= $event->rsvp_limit) {
+        if ($event->rsvp_opens_at && $event->rsvp_opens_at->isFuture()) {
+            $availability = 'https://schema.org/PreOrder';
+        } elseif ($event->rsvp_limit && $goingCount >= $event->rsvp_limit) {
             $availability = 'https://schema.org/SoldOut';
         }
 
