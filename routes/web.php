@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Groups\GroupAnalyticsController;
 use App\Http\Controllers\Groups\GroupController;
 use App\Http\Controllers\Groups\GroupJoinRequestController;
@@ -82,6 +83,11 @@ Route::middleware('auth')->group(function () {
         Route::post('groups/{group:slug}/request-join', [GroupController::class, 'requestJoin'])->name('groups.request-join');
         Route::post('groups/{group:slug}/join-requests/{joinRequest}/approve', [GroupController::class, 'approveRequest'])->name('groups.join-requests.approve');
         Route::post('groups/{group:slug}/join-requests/{joinRequest}/deny', [GroupController::class, 'denyRequest'])->name('groups.join-requests.deny');
+
+        Route::middleware('groupRole:event_organizer')->group(function () {
+            Route::get('groups/{group:slug}/events/create', [EventController::class, 'create'])->name('events.create');
+            Route::post('groups/{group:slug}/events', [EventController::class, 'store'])->name('events.store');
+        });
 
         Route::middleware('groupRole:assistant_organizer')->group(function () {
             Route::get('groups/{group:slug}/manage/members', [GroupMemberManagementController::class, 'index'])->name('groups.manage.members');
