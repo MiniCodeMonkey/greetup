@@ -15,9 +15,13 @@
                 @auth
                     @if (auth()->id() !== $member->id)
                         <div class="mt-4 flex items-center gap-3">
-                            <a href="/messages?to={{ $member->id }}" class="inline-flex items-center rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
-                                Message
-                            </a>
+                            <form action="{{ route('messages.store') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="recipient_id" value="{{ $member->id }}">
+                                <button type="submit" class="inline-flex items-center rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+                                    Message
+                                </button>
+                            </form>
 
                             <div class="relative" id="profile-actions-wrapper">
                                 <button

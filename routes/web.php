@@ -15,7 +15,9 @@ use App\Http\Controllers\Groups\GroupSettingsController;
 use App\Http\Controllers\Groups\LeadershipTeamController;
 use App\Http\Controllers\Groups\OwnershipTransferController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\Messages\ConversationController;
 use App\Http\Controllers\Settings\SettingsController;
+use App\Models\Conversation;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -77,6 +79,9 @@ Route::middleware('auth')->group(function () {
         Route::put('settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
         Route::get('settings/data-export', [SettingsController::class, 'exportData'])->name('settings.data-export');
         Route::delete('settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.account.delete');
+
+        Route::post('messages', [ConversationController::class, 'store'])->name('messages.store')->middleware('throttle:dm');
+        Route::get('messages/{conversation}', fn (Conversation $conversation) => view('messages.show', ['conversation' => $conversation]))->name('messages.show');
 
         Route::get('groups/create', [GroupController::class, 'create'])->name('groups.create');
         Route::post('groups', [GroupController::class, 'store'])->name('groups.store');
