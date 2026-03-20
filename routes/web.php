@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInterestController;
 use App\Http\Controllers\Admin\AdminReportController;
+use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -185,6 +186,9 @@ Route::middleware('auth')->group(function () {
             Route::put('admin/interests/{interest}', [AdminInterestController::class, 'update'])->name('admin.interests.update');
             Route::delete('admin/interests/{interest}', [AdminInterestController::class, 'destroy'])->name('admin.interests.destroy');
             Route::post('admin/interests/{interest}/merge', [AdminInterestController::class, 'merge'])->name('admin.interests.merge');
+
+            Route::get('admin/settings', [AdminSettingsController::class, 'index'])->name('admin.settings');
+            Route::put('admin/settings', [AdminSettingsController::class, 'update'])->name('admin.settings.update');
         });
     });
 });
