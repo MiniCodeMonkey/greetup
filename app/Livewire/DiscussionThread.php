@@ -50,6 +50,35 @@ class DiscussionThread extends Component
         $this->notifyReply($reply);
     }
 
+    public function togglePin(): void
+    {
+        Gate::authorize('pin', $this->discussion);
+
+        $this->discussion->update([
+            'is_pinned' => ! $this->discussion->is_pinned,
+        ]);
+    }
+
+    public function toggleLock(): void
+    {
+        Gate::authorize('lock', $this->discussion);
+
+        $this->discussion->update([
+            'is_locked' => ! $this->discussion->is_locked,
+        ]);
+    }
+
+    public function deleteDiscussion(): mixed
+    {
+        Gate::authorize('delete', $this->discussion);
+
+        $group = $this->discussion->group;
+
+        $this->discussion->delete();
+
+        return $this->redirect(route('groups.show', ['group' => $group->slug, 'tab' => 'discussions']));
+    }
+
     public function deleteReply(int $replyId): void
     {
         $reply = DiscussionReply::findOrFail($replyId);
