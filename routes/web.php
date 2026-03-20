@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -163,6 +164,10 @@ Route::middleware('auth')->group(function () {
             Route::post('admin/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('admin.users.suspend');
             Route::post('admin/users/{user}/unsuspend', [AdminUserController::class, 'unsuspend'])->name('admin.users.unsuspend');
             Route::delete('admin/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+
+            Route::get('admin/groups', [AdminGroupController::class, 'index'])->name('admin.groups.index');
+            Route::get('admin/groups/{group}', [AdminGroupController::class, 'show'])->name('admin.groups.show');
+            Route::delete('admin/groups/{group}', [AdminGroupController::class, 'destroy'])->name('admin.groups.destroy');
         });
     });
 });
