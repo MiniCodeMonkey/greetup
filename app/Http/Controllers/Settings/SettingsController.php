@@ -8,6 +8,7 @@ use App\Http\Requests\Settings\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Spatie\Tags\Tag;
 
 class SettingsController extends Controller
 {
@@ -17,10 +18,14 @@ class SettingsController extends Controller
     public function index(Request $request): View
     {
         $section = $request->query('section', 'profile');
+        $user = $request->user();
+
+        $interestTags = Tag::getWithType('interest')->pluck('name')->sort()->values();
 
         return view('settings.index', [
             'section' => $section,
-            'user' => $request->user(),
+            'user' => $user,
+            'interestTags' => $interestTags,
         ]);
     }
 
@@ -29,7 +34,23 @@ class SettingsController extends Controller
      */
     public function updateProfile(UpdateProfileRequest $request): RedirectResponse
     {
-        $request->user()->update($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
+
+        $user->update([
+            'name' => $validated['name'],
+            'bio' => $validated['bio'] ?? null,
+            'location' => $validated['location'] ?? null,
+            'timezone' => $validated['timezone'] ?? $user->timezone,
+            'looking_for' => $validated['looking_for'] ?? [],
+        ]);
+
+        if ($request->hasFile('avatar')) {
+            $user->addMediaFromRequest('avatar')
+                ->toMediaCollection('avatar');
+        }
+
+        $user->syncTagsWithType($validated['interests'] ?? [], 'interest');
 
         return redirect()->route('settings', ['section' => 'profile'])
             ->with('status', 'Profile updated successfully.');
