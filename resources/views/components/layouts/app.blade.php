@@ -70,56 +70,12 @@
                     @auth
                         @php
                             $user = auth()->user();
-                            $unreadCount = $user->unreadNotifications()->count();
-                            $recentNotifications = $user->notifications()->take(10)->get();
                         @endphp
 
                         {{-- Desktop authenticated controls --}}
                         <div class="hidden items-center gap-4 md:flex">
-                            {{-- Notification bell --}}
-                            <div class="relative" id="notification-wrapper">
-                                <button
-                                    type="button"
-                                    class="relative rounded-full p-2 text-neutral-500 hover:text-neutral-700"
-                                    aria-label="Notifications"
-                                    onclick="
-                                        const dropdown = document.getElementById('notification-dropdown');
-                                        dropdown.classList.toggle('hidden');
-                                        document.getElementById('account-dropdown').classList.add('hidden');
-                                    "
-                                >
-                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                                    </svg>
-                                    @if ($unreadCount > 0)
-                                        <span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-coral-500 px-1 text-[10px] font-medium text-white" data-testid="unread-count">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
-                                    @endif
-                                </button>
-
-                                {{-- Notification dropdown --}}
-                                <div id="notification-dropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-80 rounded-lg bg-white shadow-lg" style="border: 0.5px solid var(--color-neutral-200)">
-                                    <div class="px-4 py-3" style="border-bottom: 0.5px solid var(--color-neutral-200)">
-                                        <h3 class="text-sm font-medium text-neutral-900">Notifications</h3>
-                                    </div>
-                                    <div class="max-h-80 overflow-y-auto" data-testid="notification-list">
-                                        @forelse ($recentNotifications as $notification)
-                                            <div class="px-4 py-3 {{ $notification->read_at ? '' : 'bg-green-50' }}" style="border-bottom: 0.5px solid var(--color-neutral-200)">
-                                                <p class="text-sm text-neutral-700">{{ $notification->data['message'] ?? 'New notification' }}</p>
-                                                <p class="mt-1 text-xs text-neutral-400">{{ $notification->created_at->diffForHumans() }}</p>
-                                            </div>
-                                        @empty
-                                            <div class="px-4 py-6 text-center">
-                                                <p class="text-sm text-neutral-500">No notifications yet</p>
-                                            </div>
-                                        @endforelse
-                                    </div>
-                                    @if ($recentNotifications->count() >= 10)
-                                        <div class="px-4 py-3 text-center" style="border-top: 0.5px solid var(--color-neutral-200)">
-                                            <a href="/notifications" class="text-sm font-medium text-green-500 hover:text-green-700" data-testid="load-more">Load more</a>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
+                            {{-- Notification bell (Livewire) --}}
+                            <livewire:notification-dropdown />
 
                             {{-- User avatar dropdown --}}
                             <div class="relative" id="account-wrapper">
@@ -130,7 +86,6 @@
                                     onclick="
                                         const dropdown = document.getElementById('account-dropdown');
                                         dropdown.classList.toggle('hidden');
-                                        document.getElementById('notification-dropdown').classList.add('hidden');
                                     "
                                 >
                                     <x-avatar :user="$user" size="sm" />
@@ -190,10 +145,11 @@
                             <a href="/dashboard" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Dashboard</a>
                             <a href="/groups/my" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">My Groups</a>
                             <a href="/messages" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Messages</a>
+                            @php $mobileUnreadCount = $user->unreadNotifications()->count(); @endphp
                             <a href="/notifications" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
                                 Notifications
-                                @if ($unreadCount > 0)
-                                    <span class="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-coral-500 px-1 text-[10px] font-medium text-white">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                                @if ($mobileUnreadCount > 0)
+                                    <span class="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-coral-500 px-1 text-[10px] font-medium text-white">{{ $mobileUnreadCount > 99 ? '99+' : $mobileUnreadCount }}</span>
                                 @endif
                             </a>
                             <a href="/settings" class="block rounded-md px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">Settings</a>

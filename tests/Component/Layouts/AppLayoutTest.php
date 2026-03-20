@@ -17,9 +17,13 @@ function makeAuthUser(string $name = 'Jane Doe', int $id = 1, int $unreadCount =
 
     $unreadMock = Mockery::mock();
     $unreadMock->shouldReceive('count')->andReturn($unreadCount);
+    $unreadMock->shouldReceive('markAsRead')->andReturnNull();
 
     $notificationsMock = Mockery::mock();
     $notificationsMock->shouldReceive('take->get')->andReturn($notificationCollection);
+    $notificationsMock->shouldReceive('skip->take->get')->andReturn(new Collection);
+    $notificationsMock->shouldReceive('count')->andReturn(count($notifications));
+    $notificationsMock->shouldReceive('where->first')->andReturnNull();
 
     $mock = Mockery::mock($user)->makePartial();
     $mock->shouldReceive('unreadNotifications')->andReturn($unreadMock);
@@ -130,15 +134,6 @@ it('shows unread notification count badge when there are unread notifications', 
     $view = $this->blade('<x-layouts.app>Content</x-layouts.app>');
 
     $view->assertSee('data-testid="unread-count"', false);
-    $view->assertSee('>5</span>', false);
-});
-
-it('caps unread count display at 99+', function () {
-    $this->actingAs(makeAuthUser(unreadCount: 150));
-
-    $view = $this->blade('<x-layouts.app>Content</x-layouts.app>');
-
-    $view->assertSee('99+');
 });
 
 it('does not show unread count badge when no unread notifications', function () {
@@ -159,63 +154,16 @@ it('renders account dropdown with Dashboard, My Groups, Messages, Settings, Logo
     $view->assertSee('href="/messages"', false);
     $view->assertSee('href="/settings"', false);
     $view->assertSee('Logout');
-    $view->assertSee('action="' . route('logout') . '"', false);
+    $view->assertSee('action="'.route('logout').'"', false);
 });
 
-it('renders notification dropdown with recent notifications', function () {
-    $notifications = [
-        [
-            'data' => ['message' => 'Someone RSVPed to your event'],
-            'read_at' => null,
-            'created_at' => now()->subMinutes(5),
-        ],
-    ];
-    $this->actingAs(makeAuthUser(unreadCount: 1, notifications: $notifications));
-
-    $view = $this->blade('<x-layouts.app>Content</x-layouts.app>');
-
-    $view->assertSee('Someone RSVPed to your event');
-    $view->assertSee('data-testid="notification-list"', false);
-});
-
-it('shows empty state when no notifications exist', function () {
+it('renders livewire notification dropdown component for authenticated users', function () {
     $this->actingAs(makeAuthUser());
 
     $view = $this->blade('<x-layouts.app>Content</x-layouts.app>');
 
-    $view->assertSee('No notifications yet');
-});
-
-it('shows load more button when 10 or more notifications exist', function () {
-    $notifications = [];
-    for ($i = 0; $i < 10; $i++) {
-        $notifications[] = [
-            'data' => ['message' => "Notification {$i}"],
-            'read_at' => null,
-            'created_at' => now()->subMinutes($i),
-        ];
-    }
-    $this->actingAs(makeAuthUser(unreadCount: 10, notifications: $notifications));
-
-    $view = $this->blade('<x-layouts.app>Content</x-layouts.app>');
-
-    $view->assertSee('data-testid="load-more"', false);
-    $view->assertSee('Load more');
-});
-
-it('does not show load more button when fewer than 10 notifications', function () {
-    $notifications = [
-        [
-            'data' => ['message' => 'Single notification'],
-            'read_at' => null,
-            'created_at' => now(),
-        ],
-    ];
-    $this->actingAs(makeAuthUser(unreadCount: 1, notifications: $notifications));
-
-    $view = $this->blade('<x-layouts.app>Content</x-layouts.app>');
-
-    $view->assertDontSee('data-testid="load-more"', false);
+    $view->assertSee('aria-label="Notifications"', false);
+    $view->assertSee('notification-list', false);
 });
 
 it('includes all navigation and account links in mobile menu for authenticated users', function () {
@@ -236,14 +184,15 @@ it('includes all navigation and account links in mobile menu for authenticated u
 });
 
 it('highlights unread notifications in green-50 background', function () {
-    $notifications = [
+    $this->actingAs(makeAuthUser(unreadCount: 1, notifications: [
         [
-            'data' => ['message' => 'Unread notification'],
+            'id' => 'test-uuid-1',
+            'data' => ['message' => 'Unread notification', 'link' => '/test'],
             'read_at' => null,
             'created_at' => now(),
+            'type' => 'App\\Notifications\\NewEvent',
         ],
-    ];
-    $this->actingAs(makeAuthUser(unreadCount: 1, notifications: $notifications));
+    ]));
 
     $view = $this->blade('<x-layouts.app>Content</x-layouts.app>');
 

@@ -10,6 +10,10 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
+Broadcast::channel('user.{userId}.notifications', function ($user, int $userId) {
+    return $user->id === $userId;
+});
+
 Broadcast::channel('conversation.{conversationId}', function ($user, int $conversationId) {
     return ConversationParticipant::where('conversation_id', $conversationId)
         ->where('user_id', $user->id)
