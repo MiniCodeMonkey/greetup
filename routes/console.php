@@ -8,5 +8,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+Schedule::command('events:generate-recurring')->daily();
+Schedule::command('events:mark-past')->hourly();
+Schedule::command('accounts:purge-deleted')->daily();
 Schedule::command('groups:purge-deleted')->daily();
 Schedule::command('notifications:send-digests')->everyFiveMinutes();
