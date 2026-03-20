@@ -80,7 +80,7 @@
         <div class="mt-8">
             <h2 class="text-lg font-medium text-neutral-900">Quick Links</h2>
             <div class="mt-3 flex flex-wrap gap-3">
-                <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center rounded-lg bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50" style="border: 0.5px solid var(--color-neutral-200)">
+                <a href="{{ route('admin.users.index') }}" class="inline-flex items-center rounded-lg bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50" style="border: 0.5px solid var(--color-neutral-200)">
                     Manage Users
                 </a>
                 <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center rounded-lg bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50" style="border: 0.5px solid var(--color-neutral-200)">
